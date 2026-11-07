@@ -29,7 +29,7 @@ const {
 const finalTitle = seoTitle || `${title} | Igor Wielgus`;
 const finalDesc = seoDescription || description;
 
-const isBypassedForWorks = siteSettings.allowMojePraceInMaintenance && activeNav === 'moje-prace';
+const isBypassedForWorks = Boolean(siteSettings.allowMojePraceInMaintenance) && activeNav === 'moje-prace';
 const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isBypassedForWorks;
 ---
 
@@ -38,23 +38,24 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{finalTitle}</title>
-    <meta name="description" content={finalDesc} />
+    <title>{showMaintenanceByDefault ? siteSettings.maintenanceTitle : finalTitle}</title>
+    <meta name="description" content={showMaintenanceByDefault ? siteSettings.maintenanceMessage : finalDesc} />
     <meta name="robots" content={showMaintenanceByDefault ? 'noindex, nofollow' : robots} />
-    {focusKeyword && <meta name="keywords" content={focusKeyword} />}
-    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-    <meta property="og:title" content={finalTitle} />
-    <meta property="og:description" content={finalDesc} />
+    {!showMaintenanceByDefault && focusKeyword && <meta name="keywords" content={focusKeyword} />}
+    {!showMaintenanceByDefault && canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    <meta property="og:title" content={showMaintenanceByDefault ? siteSettings.maintenanceTitle : finalTitle} />
+    <meta property="og:description" content={showMaintenanceByDefault ? siteSettings.maintenanceMessage : finalDesc} />
     <meta property="og:type" content="article" />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    {!showMaintenanceByDefault && ogImage && <meta property="og:image" content={ogImage} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body
+    class:list={[{ 'is-maintenance-mode': showMaintenanceByDefault }]}
     data-maintenance-active={String(showMaintenanceByDefault)}
     data-allow-works={String(siteSettings.allowMojePraceInMaintenance)}
     data-active-nav={activeNav}
   >
-    <!-- UNDER CONSTRUCTION / MAINTENANCE OVERLAY -->
+    <!-- UNDER CONSTRUCTION / MAINTENANCE FULL-SCREEN OVERLAY (NO SITE CONTENT VISIBLE) -->
     <div
       id="maintenance-overlay"
       class="maintenance-screen"
@@ -70,7 +71,7 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
 
           <span class="status-pill" style="margin: 0 auto 1rem;">
             <span class="status-dot"></span>
-            TRYB SERWISOWY // IGORWIELGUS.PL
+            PRZERWA TECHNICZNA
           </span>
 
           <h1 id="maint-title" class="maintenance-title">
@@ -83,7 +84,7 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
 
           <div class="maintenance-progress-box">
             <div class="maint-prog-labels">
-              <span>Postęp prac w warsztacie</span>
+              <span>Postęp prac</span>
               <strong id="maint-prog-label">{siteSettings.maintenanceProgress}%</strong>
             </div>
             <div class="maint-prog-track">
@@ -95,41 +96,14 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
             </div>
           </div>
 
-          <div class="maintenance-info-grid">
-            <div class="maint-info-item">
-              <span>👤 Autor bloga</span>
-              <strong>Igor Wielgus</strong>
-            </div>
-            <div class="maint-info-item">
-              <span>🏫 Szkoła</span>
-              <strong>ZST w Lipnie • Szkoła Branżowa (2. rok)</strong>
-            </div>
-            <div class="maint-info-item">
-              <span>🔩 Kierunek</span>
-              <strong>Mechanik Pojazdów Samochodowych</strong>
-            </div>
-          </div>
-
-          {siteSettings.allowMojePraceInMaintenance && (
-            <div style="margin-top: 1.5rem;">
-              <a href="/blog/skrzynie-biegow-wypracowanie" class="btn btn-gaming">
-                📚 Przejdź do wypracowania: Skrzynie Biegów (dostępne) →
-              </a>
-            </div>
-          )}
-
           <div class="maintenance-footer">
-            <span>Administrator Danych Osobowych (RODO): <strong>Rafał Wielgus</strong></span>
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
-              <a href="/polityka-prywatnosci" class="admin-footer-link">⚖️ Polityka Prywatności i RODO</a>
-              <a href="/admin" class="admin-footer-link">🔒 Panel Admina (Wyłącz tryb budowy)</a>
-            </div>
+            <a href="/admin" class="admin-footer-link" title="Panel Administratora">🔒 Logowanie administratora</a>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- NORMAL SITE CONTENT -->
+    <!-- NORMAL SITE CONTENT (COMPLETELY HIDDEN WHEN MAINTENANCE MODE IS ON) -->
     <div id="normal-site-wrapper" hidden={showMaintenanceByDefault}>
       <header class="site-header no-print">
         <div class="container nav-inner">
@@ -237,42 +211,67 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
         if (e.key === 'Escape') closeMenu();
       });
 
-      // Sync client-side localStorage fallback for maintenance mode
+      function applyMaintenanceState(s: any) {
+        if (!s) return;
+        const activeNav = document.body.getAttribute('data-active-nav');
+        const isWorksBypass = Boolean(s.allowMojePraceInMaintenance) && activeNav === 'moje-prace';
+        const shouldShowMaint = Boolean(s.maintenanceMode) && !isWorksBypass;
+
+        document.body.classList.toggle('is-maintenance-mode', shouldShowMaint);
+        const maintOverlay = document.getElementById('maintenance-overlay');
+        const normalWrap = document.getElementById('normal-site-wrapper');
+        const rodoBanner = document.getElementById('rodo-banner');
+
+        if (maintOverlay && normalWrap) {
+          maintOverlay.hidden = !shouldShowMaint;
+          normalWrap.hidden = shouldShowMaint;
+        }
+        if (shouldShowMaint && rodoBanner) {
+          rodoBanner.hidden = true;
+        }
+        if (s.maintenanceTitle) {
+          const tEl = document.getElementById('maint-title');
+          if (tEl) tEl.textContent = s.maintenanceTitle;
+        }
+        if (s.maintenanceMessage) {
+          const mEl = document.getElementById('maint-msg');
+          if (mEl) mEl.textContent = s.maintenanceMessage;
+        }
+        if (s.maintenanceProgress !== undefined) {
+          const pLabel = document.getElementById('maint-prog-label');
+          const pBar = document.getElementById('maint-prog-bar');
+          if (pLabel) pLabel.textContent = `${s.maintenanceProgress}%`;
+          if (pBar) pBar.style.width = `${s.maintenanceProgress}%`;
+        }
+      }
+
+      // 1. Check localStorage immediately
       const savedMaintRaw = localStorage.getItem('igor_site_settings');
       if (savedMaintRaw) {
         try {
-          const parsed = JSON.parse(savedMaintRaw);
-          const activeNav = document.body.getAttribute('data-active-nav');
-          const isWorksBypass = parsed.allowMojePraceInMaintenance && activeNav === 'moje-prace';
-          const shouldShowMaint = Boolean(parsed.maintenanceMode) && !isWorksBypass;
-
-          const maintOverlay = document.getElementById('maintenance-overlay');
-          const normalWrap = document.getElementById('normal-site-wrapper');
-          if (maintOverlay && normalWrap) {
-            maintOverlay.hidden = !shouldShowMaint;
-            normalWrap.hidden = shouldShowMaint;
-          }
-          if (parsed.maintenanceTitle) {
-            const tEl = document.getElementById('maint-title');
-            if (tEl) tEl.textContent = parsed.maintenanceTitle;
-          }
-          if (parsed.maintenanceMessage) {
-            const mEl = document.getElementById('maint-msg');
-            if (mEl) mEl.textContent = parsed.maintenanceMessage;
-          }
-          if (parsed.maintenanceProgress !== undefined) {
-            const pLabel = document.getElementById('maint-prog-label');
-            const pBar = document.getElementById('maint-prog-bar');
-            if (pLabel) pLabel.textContent = `${parsed.maintenanceProgress}%`;
-            if (pBar) pBar.style.width = `${parsed.maintenanceProgress}%`;
-          }
+          applyMaintenanceState(JSON.parse(savedMaintRaw));
         } catch {}
       }
 
-      // RODO Banner logic
+      // 2. Also sync with server /api/admin/settings if running in dev/server mode
+      fetch('/api/admin/settings')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.ok && data.settings) {
+            localStorage.setItem('igor_site_settings', JSON.stringify(data.settings));
+            applyMaintenanceState(data.settings);
+          }
+        })
+        .catch(() => {});
+
+      // RODO Banner logic (only when not in maintenance mode)
       const rodoBanner = document.getElementById('rodo-banner');
       const rodoAcceptBtn = document.getElementById('rodo-accept-btn');
-      if (rodoBanner && localStorage.getItem('igor_blog_rodo_accepted') !== '1') {
+      if (
+        rodoBanner &&
+        !document.body.classList.contains('is-maintenance-mode') &&
+        localStorage.getItem('igor_blog_rodo_accepted') !== '1'
+      ) {
         rodoBanner.hidden = false;
       }
       rodoAcceptBtn?.addEventListener('click', () => {

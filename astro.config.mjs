@@ -88,10 +88,10 @@ function readJsonBody(req) {
 async function loadSettings(settingsFile) {
   const defaults = {
     maintenanceMode: false,
-    maintenanceTitle: 'Strona w budowie – Trwają prace w warsztacie!',
-    maintenanceMessage: 'Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy.',
+    maintenanceTitle: 'Strona w budowie',
+    maintenanceMessage: 'Trwają prace techniczne nad stroną. Zapraszamy wkrótce!',
     maintenanceProgress: 65,
-    allowMojePraceInMaintenance: true,
+    allowMojePraceInMaintenance: false,
     adminPasswordHash: DEFAULT_HASH,
   };
   try {

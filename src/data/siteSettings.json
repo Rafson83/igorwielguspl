@@ -1,8 +1,8 @@
 {
   "maintenanceMode": false,
-  "maintenanceTitle": "Strona w budowie – Trwają prace w warsztacie!",
-  "maintenanceMessage": "Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy. Już wkrótce pojawią się tutaj nowe artykuły z mechaniki samochodowej (ZST w Lipnie) oraz opracowania.",
+  "maintenanceTitle": "Strona w budowie",
+  "maintenanceMessage": "Trwają prace techniczne nad stroną. Zapraszamy wkrótce!",
   "maintenanceProgress": 65,
-  "allowMojePraceInMaintenance": true,
+  "allowMojePraceInMaintenance": false,
   "adminPasswordHash": "e87f3d9fbdf91cc69d8fd7ada71c617f6dc93ae6bbe3682c00fce157afa364d2"
 }
