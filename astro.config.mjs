@@ -87,11 +87,44 @@ function cmsAdminApiPlugin() {
 
         const blogDir = path.resolve(process.cwd(), 'src/content/blog');
         const uploadsDir = path.resolve(process.cwd(), 'public/media/uploads');
+        const settingsFile = path.resolve(process.cwd(), 'src/data/siteSettings.json');
         const urlObj = new URL(req.url, 'http://localhost');
 
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
         try {
+          if (urlObj.pathname === '/api/admin/settings' && req.method === 'GET') {
+            let settings = {
+              maintenanceMode: false,
+              maintenanceTitle: 'Strona w budowie – Trwają prace w warsztacie!',
+              maintenanceMessage: 'Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy.',
+              maintenanceProgress: 65,
+              allowMojePraceInMaintenance: true,
+            };
+            try {
+              const raw = await fs.readFile(settingsFile, 'utf-8');
+              settings = { ...settings, ...JSON.parse(raw) };
+            } catch {}
+            res.statusCode = 200;
+            res.end(JSON.stringify({ ok: true, settings }));
+            return;
+          }
+
+          if (urlObj.pathname === '/api/admin/settings' && req.method === 'POST') {
+            const payload = await readJsonBody(req);
+            await fs.mkdir(path.dirname(settingsFile), { recursive: true });
+            const nextSettings = {
+              maintenanceMode: Boolean(payload.maintenanceMode),
+              maintenanceTitle: String(payload.maintenanceTitle || 'Strona w budowie – Trwają prace w warsztacie!'),
+              maintenanceMessage: String(payload.maintenanceMessage || 'Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy.'),
+              maintenanceProgress: Number(payload.maintenanceProgress ?? 65),
+              allowMojePraceInMaintenance: Boolean(payload.allowMojePraceInMaintenance),
+            };
+            await fs.writeFile(settingsFile, JSON.stringify(nextSettings, null, 2) + '\n', 'utf-8');
+            res.statusCode = 200;
+            res.end(JSON.stringify({ ok: true, settings: nextSettings }));
+            return;
+          }
           if (urlObj.pathname === '/api/admin/posts' && req.method === 'GET') {
             await fs.mkdir(blogDir, { recursive: true });
             const files = await fs.readdir(blogDir);

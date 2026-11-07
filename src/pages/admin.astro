@@ -25,8 +25,11 @@ import '../styles/global.css';
         </button>
       </div>
       <div class="wp-topbar-right">
+        <button type="button" class="wp-maint-toggle-btn" id="quick-maint-toggle" title="Kliknij, aby szybko włączyć lub wyłączyć tryb Strona w budowie">
+          🚧 Strona w budowie: <strong id="quick-maint-state">WYŁ.</strong>
+        </button>
         <span class="wp-status-indicator" id="cms-status-pill">🟢 Połączono z lokalnym CMS</span>
-        <span class="wp-user-Chip">👤 Igor Wielgus (Administrator)</span>
+        <span class="wp-user-Chip">👤 Administrator</span>
       </div>
     </header>
 
@@ -42,6 +45,9 @@ import '../styles/global.css';
           </button>
           <button type="button" class="wp-nav-item" data-view-btn="categories">
             <span>📁</span> Kategorie (Moje Prace)
+          </button>
+          <button type="button" class="wp-nav-item" data-view-btn="settings">
+            <span>🚧</span> Tryb „Strona w budowie”
           </button>
           <div class="wp-nav-divider"></div>
           <a href="/kategoria/moje-prace" class="wp-nav-item" target="_blank">
@@ -447,6 +453,74 @@ import '../styles/global.css';
             </div>
           </div>
         </section>
+
+        <!-- VIEW 4: UNDER CONSTRUCTION / SITE SETTINGS -->
+        <section id="view-settings" class="wp-view" hidden>
+          <div class="wp-view-header">
+            <div>
+              <h1>🚧 Tryb „Strona w budowie” (Maintenance Mode)</h1>
+              <p>Włącz zaślepkę serwisową na czas prac nad blogiem lub dostosuj jej wygląd i dostępność wypracowań z kodów QR.</p>
+            </div>
+            <a href="/" target="_blank" class="btn btn-outline">🏠 Podgląd strony głównej ↗</a>
+          </div>
+
+          <div id="settings-toast" class="wp-toast" hidden></div>
+
+          <div class="wp-panel" style="max-width: 780px;">
+            <div class="maint-switch-box">
+              <div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.25rem;">Status trybu „Strona w budowie”</h3>
+                <p style="font-size: 0.88rem; color: var(--text-secondary);">
+                  Gdy ta opcja jest włączona, odwiedzający stronę główną zobaczą ekran warsztatowy „Strona w budowie”.
+                </p>
+              </div>
+              <label class="switch-toggle">
+                <input type="checkbox" id="set-maint-active" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+            <div class="seo-fields-grid" style="margin-top: 1.5rem;">
+              <div class="wp-field">
+                <label for="set-maint-title">Nagłówek na ekranie „Strona w budowie”</label>
+                <input
+                  type="text"
+                  id="set-maint-title"
+                  value="Strona w budowie – Trwają prace w warsztacie!"
+                />
+              </div>
+
+              <div class="wp-field">
+                <label for="set-maint-msg">Treść komunikatu dla odwiedzających</label>
+                <textarea id="set-maint-msg" rows="3">Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy. Już wkrótce pojawią się tutaj nowe artykuły z mechaniki samochodowej (ZST w Lipnie) oraz opracowania.</textarea>
+              </div>
+
+              <div class="wp-field">
+                <div class="wp-field-label-row">
+                  <label for="set-maint-prog">Pasek postępu prac warsztatowych</label>
+                  <strong id="set-maint-prog-val" style="color: var(--accent-garage); font-family: var(--font-mono);">65%</strong>
+                </div>
+                <input type="range" id="set-maint-prog" min="5" max="100" step="5" value="65" style="accent-color: var(--accent-garage);" />
+              </div>
+
+              <label class="wp-chk-row" style="padding: 0.85rem 1rem; background: rgba(0, 229, 255, 0.07); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 10px;">
+                <input type="checkbox" id="set-maint-allow-works" checked />
+                <div>
+                  <strong style="display: block; color: #fff;">📚 Pozwól na działanie kodów QR i kategorii „Moje Prace” mimo włączonej budowy</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                    Dzięki temu strona główna wyświetli „Strona w budowie”, ale wypracowanie o skrzyniach biegów z kodu QR w zeszycie nadal będzie normalnie działać!
+                  </span>
+                </div>
+              </label>
+
+              <div style="display: flex; gap: 0.85rem; margin-top: 0.5rem;">
+                <button type="button" class="btn btn-garage" id="save-settings-btn">
+                  💾 Zapisz ustawienia trybu budowy
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -466,6 +540,7 @@ import '../styles/global.css';
       const viewList = document.getElementById('view-list')!;
       const viewEditor = document.getElementById('view-editor')!;
       const viewCategories = document.getElementById('view-categories')!;
+      const viewSettings = document.getElementById('view-settings')!;
       const navBtns = document.querySelectorAll('[data-view-btn]');
 
       // Editor inputs
@@ -503,10 +578,11 @@ import '../styles/global.css';
           .replace(/^-|-$/g, '') || 'nowy-wpis';
       }
 
-      function switchView(view: 'list' | 'editor' | 'categories') {
+      function switchView(view: 'list' | 'editor' | 'categories' | 'settings') {
         viewList.hidden = view !== 'list';
         viewEditor.hidden = view !== 'editor';
         viewCategories.hidden = view !== 'categories';
+        viewSettings.hidden = view !== 'settings';
         navBtns.forEach((b) => {
           b.classList.toggle('active', b.getAttribute('data-view-btn') === view);
         });
@@ -514,7 +590,7 @@ import '../styles/global.css';
 
       navBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
-          const target = btn.getAttribute('data-view-btn') as 'list' | 'editor' | 'categories';
+          const target = btn.getAttribute('data-view-btn') as 'list' | 'editor' | 'categories' | 'settings';
           if (target === 'editor' && !editingOriginalSlug) {
             resetEditorForNewPost();
           }
@@ -1087,7 +1163,84 @@ import '../styles/global.css';
         });
       });
 
+      // Site Settings / Maintenance Mode logic
+      const setMaintActive = document.getElementById('set-maint-active') as HTMLInputElement;
+      const setMaintTitle = document.getElementById('set-maint-title') as HTMLInputElement;
+      const setMaintMsg = document.getElementById('set-maint-msg') as HTMLTextAreaElement;
+      const setMaintProg = document.getElementById('set-maint-prog') as HTMLInputElement;
+      const setMaintProgVal = document.getElementById('set-maint-prog-val')!;
+      const setMaintAllowWorks = document.getElementById('set-maint-allow-works') as HTMLInputElement;
+      const quickMaintToggle = document.getElementById('quick-maint-toggle')!;
+      const quickMaintState = document.getElementById('quick-maint-state')!;
+
+      function updateQuickMaintBadge(isActive: boolean) {
+        quickMaintState.textContent = isActive ? 'WŁĄCZONA' : 'WYŁ.';
+        quickMaintToggle.classList.toggle('is-active', isActive);
+      }
+
+      setMaintProg?.addEventListener('input', () => {
+        setMaintProgVal.textContent = `${setMaintProg.value}%`;
+      });
+
+      async function fetchSiteSettings() {
+        try {
+          const res = await fetch('/api/admin/settings');
+          const data = await res.json();
+          if (data.ok && data.settings) {
+            const s = data.settings;
+            setMaintActive.checked = Boolean(s.maintenanceMode);
+            setMaintTitle.value = s.maintenanceTitle || '';
+            setMaintMsg.value = s.maintenanceMessage || '';
+            setMaintProg.value = String(s.maintenanceProgress ?? 65);
+            setMaintProgVal.textContent = `${setMaintProg.value}%`;
+            setMaintAllowWorks.checked = Boolean(s.allowMojePraceInMaintenance);
+            updateQuickMaintBadge(Boolean(s.maintenanceMode));
+            localStorage.setItem('igor_site_settings', JSON.stringify(s));
+          }
+        } catch {}
+      }
+
+      async function saveSiteSettings(overrideActive?: boolean) {
+        const nextMode = overrideActive !== undefined ? overrideActive : setMaintActive.checked;
+        setMaintActive.checked = nextMode;
+
+        const payload = {
+          maintenanceMode: nextMode,
+          maintenanceTitle: setMaintTitle.value.trim(),
+          maintenanceMessage: setMaintMsg.value.trim(),
+          maintenanceProgress: Number(setMaintProg.value),
+          allowMojePraceInMaintenance: setMaintAllowWorks.checked,
+        };
+
+        localStorage.setItem('igor_site_settings', JSON.stringify(payload));
+        updateQuickMaintBadge(nextMode);
+
+        try {
+          const res = await fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (data.ok) {
+            const stToast = document.getElementById('settings-toast')!;
+            stToast.textContent = nextMode
+              ? '🚧 Tryb „Strona w budowie” został WŁĄCZONY!'
+              : '✅ Tryb „Strona w budowie” został WYŁĄCZONY – strona działa normalnie.';
+            stToast.hidden = false;
+            setTimeout(() => (stToast.hidden = true), 4000);
+          }
+        } catch {}
+      }
+
+      document.getElementById('save-settings-btn')?.addEventListener('click', () => saveSiteSettings());
+      setMaintActive?.addEventListener('change', () => saveSiteSettings(setMaintActive.checked));
+      quickMaintToggle?.addEventListener('click', () => {
+        saveSiteSettings(!setMaintActive.checked);
+      });
+
       fetchPosts();
+      fetchSiteSettings();
       updateWordCountAndSeo();
     </script>
 
@@ -1148,6 +1301,68 @@ import '../styles/global.css';
         font-family: var(--font-mono);
         font-size: 0.75rem;
         color: #4ade80;
+      }
+      .wp-maint-toggle-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-strong);
+        color: var(--text-secondary);
+        padding: 0.3rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .wp-maint-toggle-btn.is-active {
+        background: rgba(245, 158, 11, 0.2);
+        border-color: #f59e0b;
+        color: #fbbf24;
+      }
+      .maint-switch-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .switch-toggle {
+        position: relative;
+        display: inline-block;
+        width: 58px;
+        height: 32px;
+        flex-shrink: 0;
+      }
+      .switch-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .switch-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: #263042;
+        transition: 0.25s;
+        border-radius: 32px;
+        border: 1px solid var(--border-strong);
+      }
+      .switch-slider::before {
+        position: absolute;
+        content: "";
+        height: 24px;
+        width: 24px;
+        left: 3px;
+        bottom: 3px;
+        background-color: #fff;
+        transition: 0.25s;
+        border-radius: 50%;
+      }
+      .switch-toggle input:checked + .switch-slider {
+        background-color: var(--accent-garage);
+        border-color: var(--accent-garage);
+      }
+      .switch-toggle input:checked + .switch-slider::before {
+        transform: translateX(26px);
       }
       .wp-user-Chip {
         font-size: 0.82rem;

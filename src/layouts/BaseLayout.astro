@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import siteSettings from '../data/siteSettings.json';
 
 interface Props {
   title: string;
@@ -27,6 +28,9 @@ const {
 
 const finalTitle = seoTitle || `${title} | Igor Wielgus`;
 const finalDesc = seoDescription || description;
+
+const isBypassedForWorks = siteSettings.allowMojePraceInMaintenance && activeNav === 'moje-prace';
+const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isBypassedForWorks;
 ---
 
 <!doctype html>
@@ -36,7 +40,7 @@ const finalDesc = seoDescription || description;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{finalTitle}</title>
     <meta name="description" content={finalDesc} />
-    <meta name="robots" content={robots} />
+    <meta name="robots" content={showMaintenanceByDefault ? 'noindex, nofollow' : robots} />
     {focusKeyword && <meta name="keywords" content={focusKeyword} />}
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     <meta property="og:title" content={finalTitle} />
@@ -45,75 +49,157 @@ const finalDesc = seoDescription || description;
     {ogImage && <meta property="og:image" content={ogImage} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body>
-    <header class="site-header">
-      <div class="container nav-inner">
-        <a href="/" class="brand">
-          <div class="brand-badge">IW</div>
-          <div class="brand-text">
-            IGOR WIELGUS<span class="dot">.PL</span>
-            <span class="brand-sub">MECHANIKA SAMOCHODOWA • ZST LIPNO</span>
+  <body
+    data-maintenance-active={String(showMaintenanceByDefault)}
+    data-allow-works={String(siteSettings.allowMojePraceInMaintenance)}
+    data-active-nav={activeNav}
+  >
+    <!-- UNDER CONSTRUCTION / MAINTENANCE OVERLAY -->
+    <div
+      id="maintenance-overlay"
+      class="maintenance-screen"
+      hidden={!showMaintenanceByDefault}
+    >
+      <div class="hazard-tape"></div>
+      <div class="container maintenance-card-wrap">
+        <div class="maintenance-card">
+          <div class="maintenance-gears" aria-hidden="true">
+            <span class="gear-spin big">⚙️</span>
+            <span class="gear-spin small">🔧</span>
           </div>
-        </a>
 
-        <button
-          type="button"
-          class="hamburger-btn"
-          id="hamburger-btn"
-          aria-label="Otwórz menu nawigacji"
-          aria-expanded="false"
-          aria-controls="main-nav"
-        >
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </button>
+          <span class="status-pill" style="margin: 0 auto 1rem;">
+            <span class="status-dot"></span>
+            TRYB SERWISOWY // IGORWIELGUS.PL
+          </span>
 
-        <nav id="main-nav" class="main-nav" aria-label="Główna nawigacja">
-          <ul class="nav-links">
-            <li>
-              <a href="/" class:list={['nav-link', { active: activeNav === 'home' }]}>
-                🏠 Start
-              </a>
-            </li>
-            <li>
-              <a href="/kategoria/moje-prace" class:list={['nav-link works', { active: activeNav === 'moje-prace' }]}>
-                📚 Moje Prace
-              </a>
-            </li>
-            <li>
-              <a href="/kategoria/motoryzacja" class:list={['nav-link garage', { active: activeNav === 'motoryzacja' }]}>
-                🔧 Garaż & Mechanika
-              </a>
-            </li>
-            <li>
-              <a href="/narzedzia" class:list={['nav-link', { active: activeNav === 'warsztat' }]}>
-                ⚙️ Kalkulator & Quizy
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+          <h1 id="maint-title" class="maintenance-title">
+            {siteSettings.maintenanceTitle}
+          </h1>
 
-    <main>
-      <slot />
-    </main>
+          <p id="maint-msg" class="maintenance-lead">
+            {siteSettings.maintenanceMessage}
+          </p>
 
-    <footer class="site-footer no-print">
-      <div class="container footer-inner">
-        <div>
-          <strong>Igor Wielgus</strong> • Mechanik Pojazdów Samochodowych (Szkoła Branżowa w ZST w Lipnie – 2. rok)
-          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
-            Administrator Danych Osobowych (RODO) i przedstawiciel ustawowy: <strong>Rafał Wielgus</strong>
+          <div class="maintenance-progress-box">
+            <div class="maint-prog-labels">
+              <span>Postęp prac w warsztacie</span>
+              <strong id="maint-prog-label">{siteSettings.maintenanceProgress}%</strong>
+            </div>
+            <div class="maint-prog-track">
+              <div
+                id="maint-prog-bar"
+                class="maint-prog-fill"
+                style={`width: ${siteSettings.maintenanceProgress}%`}
+              ></div>
+            </div>
+          </div>
+
+          <div class="maintenance-info-grid">
+            <div class="maint-info-item">
+              <span>👤 Autor bloga</span>
+              <strong>Igor Wielgus</strong>
+            </div>
+            <div class="maint-info-item">
+              <span>🏫 Szkoła</span>
+              <strong>ZST w Lipnie • Szkoła Branżowa (2. rok)</strong>
+            </div>
+            <div class="maint-info-item">
+              <span>🔩 Kierunek</span>
+              <strong>Mechanik Pojazdów Samochodowych</strong>
+            </div>
+          </div>
+
+          {siteSettings.allowMojePraceInMaintenance && (
+            <div style="margin-top: 1.5rem;">
+              <a href="/blog/skrzynie-biegow-wypracowanie" class="btn btn-gaming">
+                📚 Przejdź do wypracowania: Skrzynie Biegów (dostępne) →
+              </a>
+            </div>
+          )}
+
+          <div class="maintenance-footer">
+            <span>Administrator Danych Osobowych (RODO): <strong>Rafał Wielgus</strong></span>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
+              <a href="/polityka-prywatnosci" class="admin-footer-link">⚖️ Polityka Prywatności i RODO</a>
+              <a href="/admin" class="admin-footer-link">🔒 Panel Admina (Wyłącz tryb budowy)</a>
+            </div>
           </div>
         </div>
-        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.85rem;">
-          <a href="/polityka-prywatnosci" class="admin-footer-link">⚖️ Polityka Prywatności i RODO</a>
-          <a href="/admin" class="admin-footer-link">🔒 Panel Admina (CMS)</a>
-        </div>
       </div>
-    </footer>
+    </div>
+
+    <!-- NORMAL SITE CONTENT -->
+    <div id="normal-site-wrapper" hidden={showMaintenanceByDefault}>
+      <header class="site-header no-print">
+        <div class="container nav-inner">
+          <a href="/" class="brand">
+            <div class="brand-badge">IW</div>
+            <div class="brand-text">
+              IGOR WIELGUS<span class="dot">.PL</span>
+              <span class="brand-sub">MECHANIKA SAMOCHODOWA • ZST LIPNO</span>
+            </div>
+          </a>
+
+          <button
+            type="button"
+            class="hamburger-btn"
+            id="hamburger-btn"
+            aria-label="Otwórz menu nawigacji"
+            aria-expanded="false"
+            aria-controls="main-nav"
+          >
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </button>
+
+          <nav id="main-nav" class="main-nav" aria-label="Główna nawigacja">
+            <ul class="nav-links">
+              <li>
+                <a href="/" class:list={['nav-link', { active: activeNav === 'home' }]}>
+                  🏠 Start
+                </a>
+              </li>
+              <li>
+                <a href="/kategoria/moje-prace" class:list={['nav-link works', { active: activeNav === 'moje-prace' }]}>
+                  📚 Moje Prace
+                </a>
+              </li>
+              <li>
+                <a href="/kategoria/motoryzacja" class:list={['nav-link garage', { active: activeNav === 'motoryzacja' }]}>
+                  🔧 Garaż & Mechanika
+                </a>
+              </li>
+              <li>
+                <a href="/narzedzia" class:list={['nav-link', { active: activeNav === 'warsztat' }]}>
+                  ⚙️ Kalkulator & Quizy
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer class="site-footer no-print">
+        <div class="container footer-inner">
+          <div>
+            <strong>Igor Wielgus</strong> • Mechanik Pojazdów Samochodowych (Szkoła Branżowa w ZST w Lipnie – 2. rok)
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+              Administrator Danych Osobowych (RODO) i przedstawiciel ustawowy: <strong>Rafał Wielgus</strong>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.85rem;">
+            <a href="/polityka-prywatnosci" class="admin-footer-link">⚖️ Polityka Prywatności i RODO</a>
+            <a href="/admin" class="admin-footer-link">🔒 Panel Admina (CMS)</a>
+          </div>
+        </div>
+      </footer>
+    </div>
 
     <!-- RODO / COOKIES BANNER -->
     <div id="rodo-banner" class="rodo-banner no-print" hidden role="region" aria-label="Informacja RODO i Cookies">
@@ -150,6 +236,38 @@ const finalDesc = seoDescription || description;
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeMenu();
       });
+
+      // Sync client-side localStorage fallback for maintenance mode
+      const savedMaintRaw = localStorage.getItem('igor_site_settings');
+      if (savedMaintRaw) {
+        try {
+          const parsed = JSON.parse(savedMaintRaw);
+          const activeNav = document.body.getAttribute('data-active-nav');
+          const isWorksBypass = parsed.allowMojePraceInMaintenance && activeNav === 'moje-prace';
+          const shouldShowMaint = Boolean(parsed.maintenanceMode) && !isWorksBypass;
+
+          const maintOverlay = document.getElementById('maintenance-overlay');
+          const normalWrap = document.getElementById('normal-site-wrapper');
+          if (maintOverlay && normalWrap) {
+            maintOverlay.hidden = !shouldShowMaint;
+            normalWrap.hidden = shouldShowMaint;
+          }
+          if (parsed.maintenanceTitle) {
+            const tEl = document.getElementById('maint-title');
+            if (tEl) tEl.textContent = parsed.maintenanceTitle;
+          }
+          if (parsed.maintenanceMessage) {
+            const mEl = document.getElementById('maint-msg');
+            if (mEl) mEl.textContent = parsed.maintenanceMessage;
+          }
+          if (parsed.maintenanceProgress !== undefined) {
+            const pLabel = document.getElementById('maint-prog-label');
+            const pBar = document.getElementById('maint-prog-bar');
+            if (pLabel) pLabel.textContent = `${parsed.maintenanceProgress}%`;
+            if (pBar) pBar.style.width = `${parsed.maintenanceProgress}%`;
+          }
+        } catch {}
+      }
 
       // RODO Banner logic
       const rodoBanner = document.getElementById('rodo-banner');
