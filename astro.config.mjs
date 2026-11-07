@@ -2,6 +2,13 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
+
+const DEFAULT_HASH = 'e87f3d9fbdf91cc69d8fd7ada71c617f6dc93ae6bbe3682c00fce157afa364d2';
+
+function sha256(text) {
+  return crypto.createHash('sha256').update(String(text)).digest('hex');
+}
 
 function parseMdxFile(rawContent, filename) {
   const slug = filename.replace(/\.(md|mdx)$/, '');
@@ -78,6 +85,23 @@ function readJsonBody(req) {
   });
 }
 
+async function loadSettings(settingsFile) {
+  const defaults = {
+    maintenanceMode: false,
+    maintenanceTitle: 'Strona w budowie – Trwają prace w warsztacie!',
+    maintenanceMessage: 'Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy.',
+    maintenanceProgress: 65,
+    allowMojePraceInMaintenance: true,
+    adminPasswordHash: DEFAULT_HASH,
+  };
+  try {
+    const raw = await fs.readFile(settingsFile, 'utf-8');
+    return { ...defaults, ...JSON.parse(raw) };
+  } catch {
+    return defaults;
+  }
+}
+
 function cmsAdminApiPlugin() {
   return {
     name: 'igor-cms-admin-api',
@@ -93,20 +117,52 @@ function cmsAdminApiPlugin() {
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
         try {
-          if (urlObj.pathname === '/api/admin/settings' && req.method === 'GET') {
-            let settings = {
-              maintenanceMode: false,
-              maintenanceTitle: 'Strona w budowie – Trwają prace w warsztacie!',
-              maintenanceMessage: 'Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy.',
-              maintenanceProgress: 65,
-              allowMojePraceInMaintenance: true,
-            };
-            try {
-              const raw = await fs.readFile(settingsFile, 'utf-8');
-              settings = { ...settings, ...JSON.parse(raw) };
-            } catch {}
+          const currentSettings = await loadSettings(settingsFile);
+          const expectedHash = currentSettings.adminPasswordHash || DEFAULT_HASH;
+
+          // Auth endpoint
+          if (urlObj.pathname === '/api/admin/auth' && req.method === 'POST') {
+            const payload = await readJsonBody(req);
+            const candidateHash = payload.passwordHash || sha256(payload.password || '');
+            if (candidateHash === expectedHash) {
+              res.statusCode = 200;
+              res.end(JSON.stringify({ ok: true, token: expectedHash }));
+            } else {
+              res.statusCode = 401;
+              res.end(JSON.stringify({ ok: false, error: 'Nieprawidłowe hasło administratora.' }));
+            }
+            return;
+          }
+
+          // Verify token on mutating endpoints
+          if (req.method !== 'GET') {
+            const clientToken = req.headers['x-admin-token'];
+            if (clientToken !== expectedHash) {
+              res.statusCode = 401;
+              res.end(JSON.stringify({ ok: false, error: 'Brak autoryzacji – zaloguj się ponownie.' }));
+              return;
+            }
+          }
+
+          if (urlObj.pathname === '/api/admin/password' && req.method === 'POST') {
+            const payload = await readJsonBody(req);
+            if (!payload.newPassword || String(payload.newPassword).length < 6) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ ok: false, error: 'Nowe hasło musi mieć minimum 6 znaków.' }));
+              return;
+            }
+            const newHash = sha256(payload.newPassword);
+            const updated = { ...currentSettings, adminPasswordHash: newHash };
+            await fs.writeFile(settingsFile, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
             res.statusCode = 200;
-            res.end(JSON.stringify({ ok: true, settings }));
+            res.end(JSON.stringify({ ok: true, token: newHash }));
+            return;
+          }
+
+          if (urlObj.pathname === '/api/admin/settings' && req.method === 'GET') {
+            const { adminPasswordHash, ...publicSettings } = currentSettings;
+            res.statusCode = 200;
+            res.end(JSON.stringify({ ok: true, settings: publicSettings }));
             return;
           }
 
@@ -114,6 +170,7 @@ function cmsAdminApiPlugin() {
             const payload = await readJsonBody(req);
             await fs.mkdir(path.dirname(settingsFile), { recursive: true });
             const nextSettings = {
+              ...currentSettings,
               maintenanceMode: Boolean(payload.maintenanceMode),
               maintenanceTitle: String(payload.maintenanceTitle || 'Strona w budowie – Trwają prace w warsztacie!'),
               maintenanceMessage: String(payload.maintenanceMessage || 'Blog osobisty Igora Wielgusa jest aktualnie w trakcie rozbudowy.'),
@@ -121,10 +178,12 @@ function cmsAdminApiPlugin() {
               allowMojePraceInMaintenance: Boolean(payload.allowMojePraceInMaintenance),
             };
             await fs.writeFile(settingsFile, JSON.stringify(nextSettings, null, 2) + '\n', 'utf-8');
+            const { adminPasswordHash, ...publicSettings } = nextSettings;
             res.statusCode = 200;
-            res.end(JSON.stringify({ ok: true, settings: nextSettings }));
+            res.end(JSON.stringify({ ok: true, settings: publicSettings }));
             return;
           }
+
           if (urlObj.pathname === '/api/admin/posts' && req.method === 'GET') {
             await fs.mkdir(blogDir, { recursive: true });
             const files = await fs.readdir(blogDir);

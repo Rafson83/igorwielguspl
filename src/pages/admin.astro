@@ -12,6 +12,38 @@ import '../styles/global.css';
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body class="wp-admin-body">
+    <!-- LOGIN GATE -->
+    <div id="admin-login-gate" class="login-gate">
+      <div class="login-card">
+        <div class="login-badge">IW</div>
+        <h2>🔒 Panel Administratora</h2>
+        <p>Wpisz hasło administratora, aby zarządzać wpisami, SEO oraz trybem „Strona w budowie”.</p>
+
+        <form id="admin-login-form" class="login-form">
+          <div class="login-input-wrap">
+            <input
+              type="password"
+              id="admin-password-input"
+              placeholder="Hasło administratora..."
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" id="toggle-pass-vis" class="pass-vis-btn" title="Pokaż / ukryj hasło">👁️</button>
+          </div>
+          <div id="login-error-msg" class="login-error" hidden>❌ Nieprawidłowe hasło administratora.</div>
+          <button type="submit" class="btn btn-garage" style="width: 100%; justify-content: center;">
+            🔑 Zaloguj się do CMS
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <a href="/">← Wróć na stronę główną igorwielgus.pl</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROTECTED ADMIN APP -->
+    <div id="admin-app-shell" hidden>
     <!-- TOP ADMIN BAR (WordPress style) -->
     <header class="wp-topbar">
       <div class="wp-topbar-left">
@@ -28,8 +60,8 @@ import '../styles/global.css';
         <button type="button" class="wp-maint-toggle-btn" id="quick-maint-toggle" title="Kliknij, aby szybko włączyć lub wyłączyć tryb Strona w budowie">
           🚧 Strona w budowie: <strong id="quick-maint-state">WYŁ.</strong>
         </button>
-        <span class="wp-status-indicator" id="cms-status-pill">🟢 Połączono z lokalnym CMS</span>
-        <span class="wp-user-Chip">👤 Administrator</span>
+        <span class="wp-status-indicator" id="cms-status-pill">🟢 Zalogowano</span>
+        <button type="button" class="wp-maint-toggle-btn" id="admin-logout-btn">🚪 Wyloguj</button>
       </div>
     </header>
 
@@ -520,8 +552,27 @@ import '../styles/global.css';
               </div>
             </div>
           </div>
+
+          <div class="wp-panel" style="max-width: 780px; margin-top: 1.5rem;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 0.35rem;">🔑 Zmiana hasła do Panelu Administratora</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.2rem;">
+              Hasło jest przechowywane w postaci bezpiecznego skrótu kryptograficznego SHA-256.
+            </p>
+            <div class="wp-field-row-2">
+              <div class="wp-field">
+                <label for="new-admin-pass">Nowe hasło (min. 6 znaków)</label>
+                <input type="password" id="new-admin-pass" placeholder="Wpisz nowe hasło..." />
+              </div>
+              <div class="wp-field" style="justify-content: flex-end;">
+                <button type="button" class="btn btn-outline" id="change-pass-btn" style="width: fit-content;">
+                  🔒 Zmień hasło administratora
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
+    </div>
     </div>
 
     <script>
@@ -535,6 +586,78 @@ import '../styles/global.css';
       let currentFilterCat = 'all';
       let editingOriginalSlug: string | null = null;
       let editorMode: 'visual' | 'code' = 'visual';
+      const DEFAULT_HASH = 'e87f3d9fbdf91cc69d8fd7ada71c617f6dc93ae6bbe3682c00fce157afa364d2';
+
+      async function sha256Hex(text: string): Promise<string> {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+        return Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+      }
+
+      function getAdminToken(): string {
+        return sessionStorage.getItem('igor_admin_token') || '';
+      }
+
+      const loginGate = document.getElementById('admin-login-gate')!;
+      const appShell = document.getElementById('admin-app-shell')!;
+      const loginForm = document.getElementById('admin-login-form') as HTMLFormElement;
+      const passInput = document.getElementById('admin-password-input') as HTMLInputElement;
+      const loginError = document.getElementById('login-error-msg')!;
+      const togglePassVis = document.getElementById('toggle-pass-vis');
+
+      togglePassVis?.addEventListener('click', () => {
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+      });
+
+      function unlockAdmin(token: string) {
+        sessionStorage.setItem('igor_admin_token', token);
+        loginGate.hidden = true;
+        appShell.hidden = false;
+        fetchPosts();
+        fetchSiteSettings();
+        updateWordCountAndSeo();
+      }
+
+      if (getAdminToken()) {
+        unlockAdmin(getAdminToken());
+      }
+
+      loginForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginError.hidden = true;
+        const rawPass = passInput.value;
+        const hash = await sha256Hex(rawPass);
+
+        try {
+          const res = await fetch('/api/admin/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ passwordHash: hash }),
+          });
+          const data = await res.json();
+          if (data.ok && data.token) {
+            unlockAdmin(data.token);
+            return;
+          }
+          loginError.hidden = false;
+        } catch {
+          // Offline / static fallback check
+          const localHash = localStorage.getItem('igor_custom_pass_hash') || DEFAULT_HASH;
+          if (hash === localHash) {
+            unlockAdmin(hash);
+          } else {
+            loginError.hidden = false;
+          }
+        }
+      });
+
+      document.getElementById('admin-logout-btn')?.addEventListener('click', () => {
+        sessionStorage.removeItem('igor_admin_token');
+        appShell.hidden = true;
+        loginGate.hidden = false;
+        passInput.value = '';
+      });
 
       // Views
       const viewList = document.getElementById('view-list')!;
@@ -784,7 +907,7 @@ import '../styles/global.css';
           const dataUrl = String(reader.result);
           const res = await fetch('/api/admin/upload', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-admin-token': getAdminToken() },
             body: JSON.stringify({ filename: file.name, dataUrl }),
           });
           const data = await res.json();
@@ -1034,7 +1157,7 @@ import '../styles/global.css';
 
         const res = await fetch('/api/admin/posts', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-admin-token': getAdminToken() },
           body: JSON.stringify(payload),
         });
         const data = await res.json();
@@ -1147,7 +1270,10 @@ import '../styles/global.css';
           btn.addEventListener('click', async () => {
             const slug = btn.getAttribute('data-del-slug');
             if (!slug || !confirm(`Czy na pewno chcesz usunąć wpis „${slug}”?`)) return;
-            const res = await fetch(`/api/admin/posts?slug=${encodeURIComponent(slug)}`, { method: 'DELETE' });
+            const res = await fetch(`/api/admin/posts?slug=${encodeURIComponent(slug)}`, {
+              method: 'DELETE',
+              headers: { 'x-admin-token': getAdminToken() },
+            });
             const data = await res.json();
             if (data.ok) fetchPosts();
           });
@@ -1218,7 +1344,7 @@ import '../styles/global.css';
         try {
           const res = await fetch('/api/admin/settings', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-admin-token': getAdminToken() },
             body: JSON.stringify(payload),
           });
           const data = await res.json();
@@ -1239,15 +1365,128 @@ import '../styles/global.css';
         saveSiteSettings(!setMaintActive.checked);
       });
 
-      fetchPosts();
-      fetchSiteSettings();
-      updateWordCountAndSeo();
+      document.getElementById('change-pass-btn')?.addEventListener('click', async () => {
+        const newPassInput = document.getElementById('new-admin-pass') as HTMLInputElement;
+        const newPass = newPassInput.value.trim();
+        if (newPass.length < 6) {
+          alert('Nowe hasło musi mieć co najmniej 6 znaków.');
+          return;
+        }
+        const newHash = await sha256Hex(newPass);
+        localStorage.setItem('igor_custom_pass_hash', newHash);
+        try {
+          const res = await fetch('/api/admin/password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-admin-token': getAdminToken() },
+            body: JSON.stringify({ newPassword: newPass }),
+          });
+          const data = await res.json();
+          if (data.ok && data.token) {
+            sessionStorage.setItem('igor_admin_token', data.token);
+            newPassInput.value = '';
+            const stToast = document.getElementById('settings-toast')!;
+            stToast.textContent = '🔒 Hasło administratora zostało zmienione!';
+            stToast.hidden = false;
+            setTimeout(() => (stToast.hidden = true), 4000);
+          }
+        } catch {}
+      });
     </script>
 
     <style>
       .wp-admin-body {
         background: #0b0e15;
         color: var(--text-primary);
+      }
+      .login-gate {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: radial-gradient(circle at 50% 20%, rgba(255, 107, 43, 0.12), #090c12 65%);
+      }
+      .login-gate[hidden] {
+        display: none !important;
+      }
+      .login-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-strong);
+        border-radius: 18px;
+        padding: 2.25rem;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      }
+      .login-badge {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent-garage), #ff3d00);
+        color: #fff;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        box-shadow: 0 0 20px var(--accent-garage-glow);
+      }
+      .login-card h2 {
+        font-family: var(--font-display);
+        font-size: 1.45rem;
+        margin-bottom: 0.45rem;
+      }
+      .login-card p {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.4rem;
+      }
+      .login-form {
+        display: grid;
+        gap: 0.9rem;
+      }
+      .login-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .login-input-wrap input {
+        width: 100%;
+        background: #090c12;
+        border: 1px solid var(--border-strong);
+        color: #fff;
+        padding: 0.8rem 2.8rem 0.8rem 1rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+      }
+      .pass-vis-btn {
+        position: absolute;
+        right: 0.6rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .login-error {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid #ef4444;
+        color: #fca5a5;
+        padding: 0.6rem;
+        border-radius: 8px;
+        font-size: 0.82rem;
+      }
+      .login-footer {
+        margin-top: 1.35rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-subtle);
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+      .login-footer a:hover {
+        color: var(--accent-garage);
       }
       .wp-topbar {
         height: 52px;
