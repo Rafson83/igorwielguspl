@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const adminName = 'Rafał Wielgus';
+const contactEmail = 'kontakt@igorwielgus.pl';
+const lastUpdated = '7 listopada 2026 r.';
+---
+
+<BaseLayout
+  title="Polityka Prywatności i Klauzula RODO"
+  description="Polityka prywatności, informacja o plikach cookies oraz klauzula informacyjna RODO dla serwisu igorwielgus.pl."
+>
+  <div class="container article-wrapper">
+    <div style="margin-bottom: 1.25rem;">
+      <a href="/" class="btn btn-outline" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
+        ← Wróć na stronę główną
+      </a>
+    </div>
+
+    <header class="article-header">
+      <span class="category-badge moje-prace">⚖️ Dokumenty Prawne • RODO</span>
+      <h1 class="article-title">Polityka Prywatności i Klauzula Informacyjna RODO</h1>
+      <p class="article-description">
+        Zasady przetwarzania danych osobowych, ochrony prywatności oraz wykorzystywania plików cookies w serwisie internetowym <strong>igorwielgus.pl</strong>.
+      </p>
+      <div class="article-meta-bar">
+        <span>👤 Administrator Danych: <strong>{adminName}</strong> (przedstawiciel ustawowy)</span>
+        <span>📅 Ostatnia aktualizacja: {lastUpdated}</span>
+      </div>
+    </header>
+
+    <article class="prose">
+      <h2>1. Informacje ogólne i charakter serwisu</h2>
+      <p>
+        Niniejsza Polityka Prywatności określa zasady funkcjonowania oraz ochrony prywatności użytkowników korzystających ze strony internetowej <strong>igorwielgus.pl</strong> (zwanej dalej „Serwisem” lub „Blogiem”).
+      </p>
+      <p>
+        Serwis ma charakter niekomercyjnego, edukacyjnego bloga osobistego, na którym publikowane są artykuły z zakresu mechaniki samochodowej, wypracowania szkolne oraz materiały edukacyjne tworzone przez małoletniego autora – <strong>Igora Wielgusa</strong> (ucznia Szkoły Branżowej w ZST w Lipnie), działającego za zgodą i pod nadzorem rodzica (przedstawiciela ustawowego).
+      </p>
+
+      <h2>2. Administrator Danych Osobowych (RODO)</h2>
+      <p>
+        Z uwagi na to, że autor bloga (Igor Wielgus) jest osobą niepełnoletnią, funkcję <strong>Administratora Danych Osobowych</strong> w rozumieniu Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych osobowych i w sprawie swobodnego przepływu takich danych oraz uchylenia dyrektywy 95/46/WE (ogólne rozporządzenie o ochronie danych – <strong>RODO</strong>) pełni jego rodzic i przedstawiciel ustawowy:
+      </p>
+      <blockquote>
+        <strong>Administrator Danych Osobowych:</strong> {adminName}<br />
+        <strong>Kontakt w sprawach ochrony danych osobowych (RODO):</strong> <a href={`mailto:${contactEmail}`} style="color: var(--accent-garage); font-weight: 700;">{contactEmail}</a><br />
+        <strong>Adres serwisu:</strong> https://igorwielgus.pl
+      </blockquote>
+
+      <h2>3. Zakres, cele i podstawy prawne przetwarzania danych</h2>
+      <p>
+        Serwis nie prowadzi rejestracji użytkowników, systemu komentarzy wymagającego podawania danych osobowych, newslettera ani sprzedaży towarów czy usług. Dane przetwarzane w ramach korzystania z Serwisu ograniczają się do niezbędnego minimum technicznego:
+      </p>
+      <ul>
+        <li>
+          <strong>Zapewnienie prawidłowego działania i bezpieczeństwa Serwisu (logi serwera):</strong> podczas przeglądania strony serwer hostingowy automatycznie zapisuje standardowe dane techniczne (m.in. adres IP, typ przeglądarki, czas zapytania, system operacyjny). Podstawą prawną jest <strong>art. 6 ust. 1 lit. f RODO</strong> (prawnie uzasadniony interes Administratora polegający na utrzymaniu i zabezpieczeniu strony internetowej).
+        </li>
+        <li>
+          <strong>Obsługa korespondencji e-mail:</strong> w przypadku dobrowolnego skontaktowania się z Administratorem drogą elektroniczną, dane zawarte w wiadomości (np. adres e-mail, imię i nazwisko) są przetwarzane wyłącznie w celu udzielenia odpowiedzi (podstawa prawna: <strong>art. 6 ust. 1 lit. f RODO</strong> – prawnie uzasadniony interes Administratora polegający na komunikacji z użytkownikami).
+        </li>
+        <li>
+          <strong>Interaktywne narzędzia edukacyjne na blogu (kalkulator mocy, symulator skrzyni biegów, quizy, generator kodu QR):</strong> wszystkie obliczenia oraz odpowiedzi w quizach wykonywane są wyłącznie lokalnie w przeglądarce użytkownika (po stronie klienta – JavaScript) i nie są nigdzie wysyłane ani zapisywane na serwerze.
+        </li>
+      </ul>
+
+      <h2>4. Odbiorcy danych i przekazywanie danych poza EOG</h2>
+      <p>
+        Dane techniczne (logi sieciowe) mogą być przetwarzane przez podmiot zapewniający infrastrukturę hostingową oraz repozytorium kodu dla Serwisu (np. GitHub Pages / dostawca hostingu) wyłącznie w zakresie niezbędnym do wyświetlania strony internetowej. Administrator nie sprzedaje, nie udostępnia ani nie wykorzystuje danych użytkowników w celach marketingowych lub profilowania.
+      </p>
+
+      <h2>5. Okres przechowywania danych</h2>
+      <ul>
+        <li>Dane techniczne zawarte w logach serwera przechowywane są przez okres niezbędny do zapewnienia bezpieczeństwa sieciowego i diagnostyki technicznej (zazwyczaj do 30–90 dni).</li>
+        <li>Dane z dobrowolnej korespondencji e-mail przechowywane są przez czas niezbędny do zakończenia wymiany wiadomości, a następnie mogą być archiwizowane maksymalnie przez okres przedawnienia ewentualnych roszczeń.</li>
+      </ul>
+
+      <h2>6. Prawa osób, których dane dotyczą</h2>
+      <p>
+        Zgodnie z przepisami RODO (art. 15–21), każdej osobie, której dane dotyczą, przysługują następujące prawa:
+      </p>
+      <ol>
+        <li><strong>Prawo dostępu do swoich danych</strong> oraz otrzymania ich kopii (art. 15 RODO).</li>
+        <li><strong>Prawo do sprostowania (poprawiania) swoich danych</strong> (art. 16 RODO).</li>
+        <li><strong>Prawo do usunięcia danych</strong> („prawo do bycia zapomnianym”) w przypadkach przewidzianych prawem (art. 17 RODO).</li>
+        <li><strong>Prawo do ograniczenia przetwarzania danych</strong> (art. 18 RODO).</li>
+        <li><strong>Prawo do wniesienia sprzeciwu</strong> wobec przetwarzania danych opartego na prawnie uzasadnionym interesie Administratora (art. 21 RODO).</li>
+        <li><strong>Prawo do wniesienia skargi do organu nadzorczego:</strong> w przypadku uznania, że przetwarzanie danych narusza przepisy RODO, przysługuje prawo wniesienia skargi do <strong>Prezesa Urzędu Ochrony Danych Osobowych (PUODO)</strong>, ul. Stawki 2, 00-193 Warszawa.</li>
+      </ol>
+      <p>
+        W celu realizacji powyższych praw prosimy o kontakt z Administratorem Danych Osobowych (<strong>{adminName}</strong>) pod adresem e-mail: <code>{contactEmail}</code>.
+      </p>
+
+      <h2>7. Informacja o plikach Cookies i pamięci lokalnej (LocalStorage)</h2>
+      <p>
+        Serwis wykorzystuje wyłącznie niezbędne, techniczne mechanizmy pamięci przeglądarki (takie jak <code>localStorage</code>) w celu zapamiętania informacji o zamknięciu paska informacyjnego RODO/Cookies. Serwis nie stosuje zewnętrznych plików cookies śledzących, reklamowych ani remarketingowych.
+      </p>
+      <p>
+        Użytkownik może w każdej chwili zmienić ustawienia dotyczące plików cookies i pamięci lokalnej bezpośrednio w ustawieniach swojej przeglądarki internetowej (np. Chrome, Safari, Firefox, Edge), w tym całkowicie je zablokować lub usunąć.
+      </p>
+
+      <h2>8. Prawa autorskie</h2>
+      <p>
+        Treści edukacyjne, artykuły, wypracowania, schematy oraz kod źródłowy interaktywnych symulatorów opublikowane w Serwisie stanowią własność intelektualną autora (Igora Wielgusa) oraz jego przedstawiciela ustawowego ({adminName}) i podlegają ochronie zgodnie z ustawą o prawie autorskim i prawach pokrewnych.
+      </p>
+    </article>
+  </div>
+</BaseLayout>

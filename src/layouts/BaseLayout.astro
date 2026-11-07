@@ -100,17 +100,32 @@ const finalDesc = seoDescription || description;
       <slot />
     </main>
 
-    <footer class="site-footer">
+    <footer class="site-footer no-print">
       <div class="container footer-inner">
         <div>
           <strong>Igor Wielgus</strong> • Mechanik Pojazdów Samochodowych (Szkoła Branżowa w ZST w Lipnie – 2. rok)
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+            Administrator Danych Osobowych (RODO) i przedstawiciel ustawowy: <strong>Rafał Wielgus</strong>
+          </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <span>Nauka przez tworzenie</span>
+        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.85rem;">
+          <a href="/polityka-prywatnosci" class="admin-footer-link">⚖️ Polityka Prywatności i RODO</a>
           <a href="/admin" class="admin-footer-link">🔒 Panel Admina (CMS)</a>
         </div>
       </div>
     </footer>
+
+    <!-- RODO / COOKIES BANNER -->
+    <div id="rodo-banner" class="rodo-banner no-print" hidden role="region" aria-label="Informacja RODO i Cookies">
+      <div class="container rodo-banner-inner">
+        <div class="rodo-text">
+          <strong>⚖️ Informacja RODO i Prywatność:</strong> Ten edukacyjny blog osobisty wykorzystuje wyłącznie niezbędne mechanizmy techniczne przeglądarki. Administratorem Danych Osobowych (jako przedstawiciel ustawowy niepełnoletniego autora Igora Wielgusa) jest <strong>Rafał Wielgus</strong>. Szczegóły znajdziesz w <a href="/polityka-prywatnosci">Polityce Prywatności i RODO</a>.
+        </div>
+        <button type="button" id="rodo-accept-btn" class="btn btn-garage" style="padding: 0.5rem 1.1rem; font-size: 0.85rem; white-space: nowrap;">
+          Rozumiem i akceptuję
+        </button>
+      </div>
+    </div>
 
     <script>
       const hamburgerBtn = document.getElementById('hamburger-btn');
@@ -134,6 +149,17 @@ const finalDesc = seoDescription || description;
 
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeMenu();
+      });
+
+      // RODO Banner logic
+      const rodoBanner = document.getElementById('rodo-banner');
+      const rodoAcceptBtn = document.getElementById('rodo-accept-btn');
+      if (rodoBanner && localStorage.getItem('igor_blog_rodo_accepted') !== '1') {
+        rodoBanner.hidden = false;
+      }
+      rodoAcceptBtn?.addEventListener('click', () => {
+        localStorage.setItem('igor_blog_rodo_accepted', '1');
+        if (rodoBanner) rodoBanner.hidden = true;
       });
     </script>
   </body>

@@ -840,6 +840,47 @@ a {
   gap: 1rem;
 }
 
+/* RODO / Cookie Banner */
+.rodo-banner {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 90;
+}
+
+.rodo-banner-inner {
+  background: rgba(17, 22, 34, 0.96);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 107, 43, 0.45);
+  border-radius: 14px;
+  padding: 1rem 1.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+}
+
+.rodo-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex: 1;
+  min-width: 260px;
+}
+
+.rodo-text strong {
+  color: #fff;
+}
+
+.rodo-text a {
+  color: var(--accent-garage);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 920px) {
   .hamburger-btn {
