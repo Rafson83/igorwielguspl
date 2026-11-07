@@ -1,5 +1,5 @@
 {
-  "maintenanceMode": false,
+  "maintenanceMode": true,
   "maintenanceTitle": "Strona w budowie",
   "maintenanceMessage": "Trwają prace techniczne nad stroną. Zapraszamy wkrótce!",
   "maintenanceProgress": 65,

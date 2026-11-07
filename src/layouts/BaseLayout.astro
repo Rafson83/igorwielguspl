@@ -60,6 +60,7 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
       id="maintenance-overlay"
       class="maintenance-screen"
       hidden={!showMaintenanceByDefault}
+      style={!showMaintenanceByDefault ? 'display: none;' : ''}
     >
       <div class="hazard-tape"></div>
       <div class="container maintenance-card-wrap">
@@ -104,7 +105,11 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
     </div>
 
     <!-- NORMAL SITE CONTENT (COMPLETELY HIDDEN WHEN MAINTENANCE MODE IS ON) -->
-    <div id="normal-site-wrapper" hidden={showMaintenanceByDefault}>
+    <div
+      id="normal-site-wrapper"
+      hidden={showMaintenanceByDefault}
+      style={showMaintenanceByDefault ? 'display: none;' : ''}
+    >
       <header class="site-header no-print">
         <div class="container nav-inner">
           <a href="/" class="brand">
@@ -218,13 +223,15 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
         const shouldShowMaint = Boolean(s.maintenanceMode) && !isWorksBypass;
 
         document.body.classList.toggle('is-maintenance-mode', shouldShowMaint);
-        const maintOverlay = document.getElementById('maintenance-overlay');
-        const normalWrap = document.getElementById('normal-site-wrapper');
-        const rodoBanner = document.getElementById('rodo-banner');
+        const maintOverlay = document.getElementById('maintenance-overlay') as HTMLElement | null;
+        const normalWrap = document.getElementById('normal-site-wrapper') as HTMLElement | null;
+        const rodoBanner = document.getElementById('rodo-banner') as HTMLElement | null;
 
         if (maintOverlay && normalWrap) {
           maintOverlay.hidden = !shouldShowMaint;
+          maintOverlay.style.display = shouldShowMaint ? 'flex' : 'none';
           normalWrap.hidden = shouldShowMaint;
+          normalWrap.style.display = shouldShowMaint ? 'none' : 'block';
         }
         if (shouldShowMaint && rodoBanner) {
           rodoBanner.hidden = true;
@@ -245,16 +252,8 @@ const showMaintenanceByDefault = Boolean(siteSettings.maintenanceMode) && !isByp
         }
       }
 
-      // 1. Check localStorage immediately
-      const savedMaintRaw = localStorage.getItem('igor_site_settings');
-      if (savedMaintRaw) {
-        try {
-          applyMaintenanceState(JSON.parse(savedMaintRaw));
-        } catch {}
-      }
-
-      // 2. Also sync with server /api/admin/settings if running in dev/server mode
-      fetch('/api/admin/settings')
+      // Sync with server /api/admin/settings (works across all devices: PC, phones, tablets)
+      fetch('/api/admin/settings', { cache: 'no-store' })
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           if (data?.ok && data.settings) {
