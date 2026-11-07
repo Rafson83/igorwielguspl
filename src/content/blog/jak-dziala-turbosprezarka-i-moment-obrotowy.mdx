@@ -1,0 +1,73 @@
+---
+title: "Skąd bierze się „wgniatanie w fotel”? Turbosprężarka, moment obrotowy i moc w praktyce"
+description: "Rozkładamy na czynniki pierwsze różnicę między momentem obrotowym (Nm) a mocą (KM) oraz sprawdzamy, jak turbosprężarka wykorzystuje energię spalin."
+date: "2026-11-07"
+category: "motoryzacja"
+tags: ["silniki", "turbo", "mechanika", "ZST-Lipno"]
+readingTime: "6 min"
+featured: true
+---
+
+import PowerCalculator from '../../components/PowerCalculator.astro';
+import MechanicQuiz from '../../components/MechanicQuiz.astro';
+import WorkshopTip from '../../components/WorkshopTip.astro';
+
+Cześć! Nazywam się **Igor Wielgus** i uczę się na drugim roku w **Szkole Branżowej w ZST w Lipnie** na kierunku **mechanik pojazdów samochodowych**. Na zajęciach i w garażu bardzo często pojawia się jedno pytanie: *„Co właściwie daje to uczucie wgniatanie w fotel – konie mechaniczne czy niutonometry?”*
+
+W tym wpisie wyjaśniam to prostym językiem, dokładnie tak, jak uczymy się analizować układy napędowe na warsztatach.
+
+## Moment obrotowy (Nm) vs Moc (KM) – najprostsze porównanie
+
+Wyobraź sobie, że odkręcasz zapieczoną śrubę koła długim kluczem:
+- **Moment obrotowy (Nm)** to siła, z jaką naciskasz na klucz (czyli jak mocno wał korbowy „pcha” w pojedynczym obrocie).
+- **Moc (KM / kW)** to połączenie tej siły z **prędkością obrotową (RPM)** – czyli jak szybko jesteś w stanie kręcić tym kluczem pod obciążeniem.
+
+> **W skrócie:** Moment obrotowy odpowiada za to, jak mocno auto wyrywa do przodu przy danym biegu, a moc mówi nam, jak długo i przy jakich obrotach silnik potrafi utrzymać to przyspieszenie.
+
+Sprawdź to sam na interaktywnym kalkulatorze poniżej – przesuń suwak momentu obrotowego i obrotów (RPM), aby zobaczyć jak zmienia się moc silnika:
+
+<PowerCalculator defaultTorque={340} defaultRpm={4000} defaultWeight={1420} />
+
+## Jak działa turbosprężarka? Darmowa energia z wydechu
+
+W silniku wolnossącym tłok zasysa tyle powietrza, ile zdąży wpaść przez zawór dolotowy pod wpływem podciśnienia. Problem? Więcej paliwa nie spalisz bez większej ilości tlenu.
+
+Tutaj wchodzi **turbosprężarka**, która składa się z dwóch wirników na wspólnym wałku:
+1. **Strona gorąca (turbina)** – napędzana spalinami wylatującymi z kolektora wydechowego.
+2. **Strona zimna (sprężarka)** – tłoczy świeże powietrze pod ciśnieniem przez **intercooler** prosto do cylindrów.
+
+<WorkshopTip title="Zasada z warsztatu: Dlaczego chłodzimy turbo przed zgaszeniem?" type="warsztat">
+  Wirnik turbosprężarki potrafi kręcić się z prędkością ponad <strong>150 000 – 200 000 obr./min</strong>, a strona gorąca rozgrzewa się do kilkuset stopni Celsjusza. Jeśli po ostrej jeździe od razu przekręcisz kluczyk, pompa oleju przestaje pracować, a stojący w łożysku olej zaczyna się zwęglać. Wystarczy <strong>30–60 sekund pracy na biegu jałowym</strong>, żeby ocalić turbo!
+</WorkshopTip>
+
+## Po co w układzie jest Intercooler?
+
+Kiedy sprężamy powietrze w turbosprężarce, jego temperatura gwałtownie rośnie. Gorące powietrze ma **mniejszą gęstość** (czyli mniej cząsteczek tlenu w tej samej objętości) i zwiększa ryzyko spalania stukowego w benzyniakach.
+
+**Intercooler** (chłodnica powietrza doładowującego) obniża temperaturę sprężonego powietrza przed kolektorem ssącym – dzięki temu do cylindra trafia gęsty ładunek tlenu.
+
+<MechanicQuiz
+  title="Sprawdź, czy ogarniasz doładowanie i parametry silnika!"
+  questions={[
+    {
+      question: "Co bezpośrednio napędza wirnik strony gorącej w klasycznej turbosprężarce?",
+      options: [
+        "Pasek osprzętu połączony z wałem korbowym",
+        "Energia gazów wylotowych (spalin) z kolektora wydechowego",
+        "Silnik elektryczny 12V sterowany przez ECU"
+      ],
+      correctIndex: 1,
+      explanation: "Pasek napędza kompresor mechaniczny (supercharger). Turbosprężarka wykorzystuje energię spalin wylatujących z silnika."
+    },
+    {
+      question: "Dlaczego za turbosprężarką montuje się intercooler?",
+      options: [
+        "Aby schłodzić sprężone powietrze i zwiększyć jego gęstość (ilość tlenu)",
+        "Aby podgrzać paliwo przed wtryskiem do komory spalania",
+        "Aby wyciszyć dźwięk zaworu upustowego"
+      ],
+      correctIndex: 0,
+      explanation: "Chłodniejsze powietrze jest gęstsze, co pozwala dostarczyć więcej tlenu do cylindra i bezpiecznie uzyskać większą moc."
+    }
+  ]}
+/>

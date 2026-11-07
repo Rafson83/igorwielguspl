@@ -1,0 +1,64 @@
+---
+title: "Diagnostyka OBD2 bez zgadywania – czego uczę się na 2. roku w ZST Lipno"
+description: "Dlaczego błąd sondy lambda nie zawsze oznacza zepsutą sondę? Notatki z nauki diagnostyki komputerowej i podstawowych pomiarów warsztatowych."
+date: "2026-11-01"
+category: "warsztat"
+tags: ["OBD2", "diagnostyka", "ZST-Lipno", "elektryka"]
+readingTime: "5 min"
+featured: false
+---
+
+import MechanicQuiz from '../../components/MechanicQuiz.astro';
+import WorkshopTip from '../../components/WorkshopTip.astro';
+
+Jedna z najważniejszych rzeczy, jakich uczymy się na drugim roku mechaniki samochodowej w **Szkole Branżowej w ZST w Lipnie**, brzmi: **komputer diagnostyczny nie mówi, którą część wymienić – on mówi, w którym obwodzie lub parametrze sterownik widzi anomalię**.
+
+Wielu początkujących podpina skaner OBD2, widzi kod błędu dotyczący np. przepływomierza lub sondy lambda i od razu zamawia nową część. A po wymianie? Kontrolka *Check Engine* wraca po 20 kilometrach.
+
+## Jak rozkodować kod błędu OBD2 (np. P0171)?
+
+Każdy standardowy kod składa się z litery i czterech cyfr:
+- **P (Powertrain)** – układ napędowy (silnik, skrzynia biegów)
+- **C (Chassis)** – podwozie (ABS, ESP, zawieszenie)
+- **B (Body)** – nadwozie (poduszki, komfort, klimatyzacja)
+- **U (Network)** – komunikacja sieciowa (szyna CAN)
+
+Na przykład bardzo popularny kod **`P0171`** oznacza: *Układ zbyt ubogi (Bank 1)*.
+
+### Co to tak naprawdę znaczy?
+Sterownik silnika (ECU) widzi za dużo tlenu w spalinach i musi dolewać więcej paliwa (korekty paliwowe STFT/LTFT idą mocno na plus), żeby utrzymać mieszankę stechiometryczną.
+
+Zamiast w ciemno wymieniać sondę lambda, dobry mechanik sprawdza po kolei:
+1. **Nieszczelność w dolocie (lewe powietrze)** – pęknięty wężyk podciśnienia lub guma za przepływomierzem.
+2. **Ciśnienie paliwa** – słaba pompa paliwa lub przytkany filtr.
+3. **Wskazania przepływomierza (MAF)** w parametrach rzeczywistych (*Live Data*).
+
+<WorkshopTip title="Złota zasada przed wymianą części" type="bezpieczenstwo">
+  Zanim kupisz nowy czujnik, zawsze sprawdź <strong>wiązki elektryczne, wtyczki i masę</strong> oraz podejrzyj parametry rzeczywiste (Live Data) pod obciążeniem. Śniedź w kostce albo przetarty przewód potrafią wygenerować dokładnie taki sam błąd jak uszkodzony czujnik!
+</WorkshopTip>
+
+<MechanicQuiz
+  title="Quiz diagnostyczny – postaw trafną diagnozę!"
+  questions={[
+    {
+      question: "Co oznacza pierwsza litera 'P' w kodzie błędu P0301?",
+      options: [
+        "Układ napędowy – silnik i skrzynia biegów (Powertrain)",
+        "Układ poduszek powietrznych i pasów (Passive Safety)",
+        "Czujniki parkowania (Parking System)"
+      ],
+      correctIndex: 0,
+      explanation: "Litera P (Powertrain) oznacza kody związane z pracą silnika, układu paliwowego, zapłonowego oraz skrzyni biegów."
+    },
+    {
+      question: "W aucie benzynowym pojawia się błąd P0171 (zbyt uboga mieszanka), a silnik faluje na wolnych obrotach. Co warto sprawdzić w pierwszej kolejności?",
+      options: [
+        "Wymienić od razu tłumik końcowy",
+        "Sprawdzić szczelność układu dolotowego (czy nie ciągnie tzw. lewego powietrza za przepływomierzem)",
+        "Wymienić płyn hamulcowy DOT-4"
+      ],
+      correctIndex: 1,
+      explanation: "Lewe powietrze wpadające za przepływomierzem nie jest mierzone przez ECU, przez co mieszanka staje się zbyt uboga szczególnie na biegu jałowym."
+    }
+  ]}
+/>

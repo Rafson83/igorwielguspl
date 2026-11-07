@@ -1,0 +1,46 @@
+---
+import type { BlogPost } from '../utils/posts';
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+
+const categoryLabels: Record<string, string> = {
+  'moje-prace': '📚 Moje Prace • ZST Lipno',
+  motoryzacja: '🔧 Garaż & Mechanika',
+  warsztat: '🛠️ ZST Lipno • Praktyka',
+  hobby: '🎮 Po Godzinach',
+};
+---
+
+<article class="post-card" data-category={post.frontmatter.category}>
+  <div>
+    <div class="post-meta-top">
+      <span class={`category-badge ${post.frontmatter.category}`}>
+        {categoryLabels[post.frontmatter.category] ?? post.frontmatter.category}
+      </span>
+      <time class="post-date" datetime={post.frontmatter.date}>
+        {post.frontmatter.date} • {post.frontmatter.readingTime}
+      </time>
+    </div>
+
+    <a href={`/blog/${post.slug}`}>
+      <h3 class="post-title">{post.frontmatter.title}</h3>
+    </a>
+
+    <p class="post-excerpt">{post.frontmatter.description}</p>
+  </div>
+
+  <div class="post-footer">
+    <div class="tag-list">
+      {post.frontmatter.tags.slice(0, 3).map((tag) => (
+        <span class="tag">#{tag}</span>
+      ))}
+    </div>
+    <a href={`/blog/${post.slug}`} class="read-more">
+      Czytaj →
+    </a>
+  </div>
+</article>

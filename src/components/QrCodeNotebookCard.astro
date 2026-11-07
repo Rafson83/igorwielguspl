@@ -1,0 +1,488 @@
+---
+interface Props {
+  defaultUrl?: string;
+  essayTitle?: string;
+  author?: string;
+  schoolInfo?: string;
+}
+
+const {
+  defaultUrl = 'https://igorwielgus.pl/blog/skrzynie-biegow-wypracowanie',
+  essayTitle = 'Ewolucja, budowa i zasada działania samochodowych skrzyń biegów',
+  author = 'Igor Wielgus',
+  schoolInfo = 'Klasa 2 • Szkoła Branżowa w ZST w Lipnie (Mechanik Pojazdów Samochodowych)',
+} = Astro.props;
+---
+
+<section class="qr-notebook-card" id="kod-qr-do-zeszytu" data-qr-widget data-default-url={defaultUrl}>
+  <div class="qr-card-grid">
+    <div class="qr-info-col">
+      <div class="qr-badge-row">
+        <span class="qr-badge">📱 Multimedialne Wypracowanie (QR)</span>
+        <span class="qr-badge secondary">Do wklejenia w zeszycie</span>
+      </div>
+
+      <h3>Wirtualny odpowiednik wypracowania pisemnego</h3>
+      <p>
+        Zeskanuj kod QR aparatem telefonu, aby otworzyć tę stronę z <strong>filmem z pracy skrzyni biegów</strong>, <strong>schematami technicznymi (MT, DCT, AT, CVT)</strong> oraz <strong>interaktywnym symulatorem przełożeń</strong>.
+      </p>
+
+      <div class="qr-url-controls no-print">
+        <label for="qr-url-input">Adres URL zakodowany w kodzie QR (możesz zmienić np. na lokalny adres Wi-Fi lub domenę):</label>
+        <div class="qr-input-row">
+          <input type="text" id="qr-url-input" value={defaultUrl} data-qr-input />
+          <button type="button" class="btn btn-outline" data-use-current-url title="Użyj aktualnego adresu z paska przeglądarki">
+            📍 Użyj bieżącego URL
+          </button>
+        </div>
+      </div>
+
+      <div class="qr-actions no-print">
+        <button type="button" class="btn btn-garage" data-print-qr>
+          🖨️ Wydrukuj wklejkę QR do zeszytu
+        </button>
+        <button type="button" class="btn btn-gaming" data-download-qr>
+          ⬇️ Pobierz kod QR (SVG)
+        </button>
+      </div>
+    </div>
+
+    <!-- PRINTABLE STICKER PREVIEW -->
+    <div class="qr-sticker-preview" id="qr-printable-sticker">
+      <div class="sticker-top">
+        <span class="sticker-tag">DODATEK MULTIMEDIALNY DO WYPRACOWANIA</span>
+        <strong class="sticker-title">{essayTitle}</strong>
+      </div>
+
+      <div class="sticker-qr-wrap">
+        <div class="qr-svg-container" data-qr-svg-box aria-label="Kod QR do wypracowania"></div>
+      </div>
+
+      <div class="sticker-meta">
+        <div><strong>Autor:</strong> {author}</div>
+        <div>{schoolInfo}</div>
+        <div class="sticker-url" data-qr-url-caption>{defaultUrl}</div>
+        <div class="sticker-hint">📷 Zeskanuj aparatem telefonu: Wideo pracy skrzyni + Schematy MT/DCT/AT/CVT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Compact, dependency-free ISO/IEC 18004 QR Code Generator (Byte mode, ECC Level L, Versions 1..6)
+  function generateQrSvg(text: string): string {
+    const utf8 = Array.from(new TextEncoder().encode(text));
+    // Version table for ECC Level L (total codewords, ec codewords per block, max byte capacity)
+    const VERSIONS = [
+      { v: 1, size: 21, total: 26, ec: 7, cap: 17, align: [] as number[] },
+      { v: 2, size: 25, total: 44, ec: 10, cap: 32, align: [6, 18] },
+      { v: 3, size: 29, total: 70, ec: 15, cap: 53, align: [6, 22] },
+      { v: 4, size: 33, total: 100, ec: 20, cap: 78, align: [6, 26] },
+      { v: 5, size: 37, total: 134, ec: 26, cap: 106, align: [6, 30] },
+      { v: 6, size: 41, total: 172, ec: 18, blocks: 2, cap: 134, align: [6, 34] },
+    ];
+
+    const ver = VERSIONS.find((x) => utf8.length <= x.cap) || VERSIONS[VERSIONS.length - 1];
+    const dataBytes = utf8.slice(0, ver.cap);
+    const numBlocks = (ver as any).blocks || 1;
+    const totalDataCodewords = ver.total - ver.ec * numBlocks;
+
+    // Build bit stream: Mode 0100 (4 bits), char count (8 bits for v1..9), data, terminator, padding
+    const bits: number[] = [];
+    const pushBits = (val: number, len: number) => {
+      for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1);
+    };
+    pushBits(0b0100, 4);
+    pushBits(dataBytes.length, 8);
+    for (const b of dataBytes) pushBits(b, 8);
+    const maxBits = totalDataCodewords * 8;
+    pushBits(0, Math.min(4, maxBits - bits.length));
+    while (bits.length % 8 !== 0) bits.push(0);
+
+    const codewords: number[] = [];
+    for (let i = 0; i < bits.length; i += 8) {
+      let byte = 0;
+      for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
+      codewords.push(byte);
+    }
+    const padBytes = [0xec, 0x11];
+    let padIdx = 0;
+    while (codewords.length < totalDataCodewords) {
+      codewords.push(padBytes[padIdx % 2]);
+      padIdx++;
+    }
+
+    // GF(256) math for Reed-Solomon
+    const exp = new Uint8Array(512);
+    const log = new Uint8Array(256);
+    let x = 1;
+    for (let i = 0; i < 255; i++) {
+      exp[i] = x;
+      log[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;
+    }
+    for (let i = 255; i < 512; i++) exp[i] = exp[i - 255];
+
+    const gfMul = (a: number, b: number) => (a === 0 || b === 0 ? 0 : exp[log[a] + log[b]]);
+
+    const polyMul = (p: number[], q: number[]) => {
+      const res = new Array(p.length + q.length - 1).fill(0);
+      for (let i = 0; i < p.length; i++) {
+        for (let j = 0; j < q.length; j++) {
+          res[i + j] ^= gfMul(p[i], q[j]);
+        }
+      }
+      return res;
+    };
+
+    let gen = [1];
+    for (let i = 0; i < ver.ec; i++) gen = polyMul(gen, [1, exp[i]]);
+
+    const computeEc = (block: number[]) => {
+      const msg = [...block, ...new Array(ver.ec).fill(0)];
+      for (let i = 0; i < block.length; i++) {
+        const coef = msg[i];
+        if (coef !== 0) {
+          for (let j = 0; j < gen.length; j++) {
+            msg[i + j] ^= gfMul(gen[j], coef);
+          }
+        }
+      }
+      return msg.slice(block.length);
+    };
+
+    const dataBlocks: number[][] = [];
+    const ecBlocks: number[][] = [];
+    const blockSize = totalDataCodewords / numBlocks;
+    for (let b = 0; b < numBlocks; b++) {
+      const blk = codewords.slice(b * blockSize, (b + 1) * blockSize);
+      dataBlocks.push(blk);
+      ecBlocks.push(computeEc(blk));
+    }
+
+    const finalBytes: number[] = [];
+    for (let i = 0; i < blockSize; i++) {
+      for (let b = 0; b < numBlocks; b++) finalBytes.push(dataBlocks[b][i]);
+    }
+    for (let i = 0; i < ver.ec; i++) {
+      for (let b = 0; b < numBlocks; b++) finalBytes.push(ecBlocks[b][i]);
+    }
+
+    const size = ver.size;
+    const grid: (number | null)[][] = Array.from({ length: size }, () => new Array(size).fill(null));
+    const reserved: boolean[][] = Array.from({ length: size }, () => new Array(size).fill(false));
+
+    const setMod = (r: number, c: number, val: number, res = true) => {
+      if (r >= 0 && r < size && c >= 0 && c < size) {
+        grid[r][c] = val;
+        if (res) reserved[r][c] = true;
+      }
+    };
+
+    const placeFinder = (row: number, col: number) => {
+      for (let r = -1; r <= 7; r++) {
+        for (let c = -1; c <= 7; c++) {
+          const isBorder = r === -1 || r === 7 || c === -1 || c === 7;
+          const isOuter = r === 0 || r === 6 || c === 0 || c === 6;
+          const isInner = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+          setMod(row + r, col + c, !isBorder && (isOuter || isInner) ? 1 : 0, true);
+        }
+      }
+    };
+
+    placeFinder(0, 0);
+    placeFinder(0, size - 7);
+    placeFinder(size - 7, 0);
+
+    // Alignment patterns
+    if (ver.align.length > 0) {
+      for (const r of ver.align) {
+        for (const c of ver.align) {
+          if ((r === 6 && c === 6) || (r === 6 && c === size - 7) || (r === size - 7 && c === 6)) continue;
+          for (let dr = -2; dr <= 2; dr++) {
+            for (let dc = -2; dc <= 2; dc++) {
+              const v = Math.max(Math.abs(dr), Math.abs(dc)) !== 1 ? 1 : 0;
+              setMod(r + dr, c + dc, v, true);
+            }
+          }
+        }
+      }
+    }
+
+    // Timing patterns
+    for (let i = 8; i < size - 8; i++) {
+      if (!reserved[6][i]) setMod(6, i, i % 2 === 0 ? 1 : 0, true);
+      if (!reserved[i][6]) setMod(i, 6, i % 2 === 0 ? 1 : 0, true);
+    }
+
+    // Dark module & format areas
+    setMod(size - 8, 8, 1, true);
+    for (let i = 0; i < 9; i++) {
+      if (!reserved[8][i]) reserved[8][i] = true;
+      if (!reserved[i][8]) reserved[i][8] = true;
+    }
+    for (let i = 0; i < 8; i++) {
+      reserved[8][size - 1 - i] = true;
+      reserved[size - 1 - i][8] = true;
+    }
+
+    // Place data bits
+    const allBits: number[] = [];
+    for (const b of finalBytes) {
+      for (let i = 7; i >= 0; i--) allBits.push((b >> i) & 1);
+    }
+
+    let bitIdx = 0;
+    let upward = true;
+    for (let col = size - 1; col > 0; col -= 2) {
+      if (col === 6) col--;
+      for (let i = 0; i < size; i++) {
+        const row = upward ? size - 1 - i : i;
+        for (let dc = 0; dc < 2; dc++) {
+          const c = col - dc;
+          if (!reserved[row][c]) {
+            const bit = bitIdx < allBits.length ? allBits[bitIdx++] : 0;
+            // Mask 0: (row + c) % 2 === 0
+            const masked = (row + c) % 2 === 0 ? bit ^ 1 : bit;
+            grid[row][c] = masked;
+          }
+        }
+      }
+      upward = !upward;
+    }
+
+    // Format info for Level L (01) + Mask 0 (000) => 0x77c4 (bits: 111011111000100)
+    const fmtBits = 0x77c4;
+    const fmtCoords1 = [
+      [8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8],
+      [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8],
+    ];
+    for (let i = 0; i < 15; i++) {
+      const bit = (fmtBits >> i) & 1;
+      const [r, c] = fmtCoords1[i];
+      grid[r][c] = bit;
+      if (i < 7) grid[size - 1 - i][8] = bit;
+      else grid[8][size - 15 + i] = bit;
+    }
+
+    const margin = 3;
+    const totalModules = size + margin * 2;
+    let paths = '';
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (grid[r][c] === 1) {
+          paths += `M${c + margin},${r + margin}h1v1h-1z`;
+        }
+      }
+    }
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalModules} ${totalModules}" shape-rendering="crispEdges" width="180" height="180"><rect width="100%" height="100%" fill="#ffffff" rx="2"/><path d="${paths}" fill="#0a0d12"/></svg>`;
+  }
+
+  document.querySelectorAll('[data-qr-widget]').forEach((widget) => {
+    const input = widget.querySelector('[data-qr-input]') as HTMLInputElement;
+    const svgBox = widget.querySelector('[data-qr-svg-box]') as HTMLElement;
+    const urlCaption = widget.querySelector('[data-qr-url-caption]') as HTMLElement;
+    const useCurrentBtn = widget.querySelector('[data-use-current-url]');
+    const printBtn = widget.querySelector('[data-print-qr]');
+    const downloadBtn = widget.querySelector('[data-download-qr]');
+
+    function render() {
+      const url = input.value.trim() || 'https://igorwielgus.pl';
+      svgBox.innerHTML = generateQrSvg(url);
+      if (urlCaption) urlCaption.textContent = url;
+    }
+
+    input?.addEventListener('input', render);
+
+    useCurrentBtn?.addEventListener('click', () => {
+      input.value = window.location.href;
+      render();
+    });
+
+    printBtn?.addEventListener('click', () => {
+      window.print();
+    });
+
+    downloadBtn?.addEventListener('click', () => {
+      const svgContent = svgBox.innerHTML;
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'kod-qr-wypracowanie-skrzynie-biegow.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    render();
+  });
+</script>
+
+<style>
+  .qr-notebook-card {
+    background: linear-gradient(150deg, #161e2e, #0e131d);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    border-radius: 18px;
+    padding: 1.75rem;
+    margin: 2rem 0;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+  .qr-card-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 0.9fr;
+    gap: 1.75rem;
+    align-items: center;
+  }
+  .qr-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+  }
+  .qr-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    background: rgba(0, 229, 255, 0.14);
+    color: var(--accent-gaming);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+  }
+  .qr-badge.secondary {
+    background: rgba(255, 107, 43, 0.14);
+    color: #ff9466;
+    border-color: rgba(255, 107, 43, 0.35);
+  }
+  .qr-info-col h3 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: #fff;
+    margin: 0 0 0.5rem !important;
+  }
+  .qr-info-col p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.1rem;
+  }
+  .qr-url-controls label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+  }
+  .qr-input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.1rem;
+  }
+  .qr-input-row input {
+    flex: 1;
+    min-width: 210px;
+    background: #0a0d12;
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+  .qr-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .qr-sticker-preview {
+    background: #ffffff;
+    color: #0f172a;
+    border: 2px dashed #ff6b2b;
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+  .sticker-top {
+    margin-bottom: 0.65rem;
+  }
+  .sticker-tag {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #ea580c;
+    letter-spacing: 0.06em;
+  }
+  .sticker-title {
+    display: block;
+    font-size: 0.92rem;
+    line-height: 1.25;
+    color: #0f172a !important;
+    margin-top: 0.2rem;
+  }
+  .sticker-qr-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 0.5rem 0;
+  }
+  .sticker-meta {
+    font-size: 0.76rem;
+    color: #334155;
+    line-height: 1.4;
+  }
+  .sticker-meta strong {
+    color: #0f172a !important;
+  }
+  .sticker-url {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: #0284c7;
+    word-break: break-all;
+    margin: 0.3rem 0;
+    font-weight: 700;
+  }
+  .sticker-hint {
+    margin-top: 0.35rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  @media (max-width: 820px) {
+    .qr-card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media print {
+    :global(body > *:not(main)),
+    :global(.article-header),
+    :global(.no-print),
+    :global(.prose > *:not(.qr-notebook-card)) {
+      display: none !important;
+    }
+    .qr-notebook-card {
+      border: none;
+      background: none;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+    }
+    .qr-card-grid {
+      display: block;
+    }
+    .qr-info-col {
+      display: none;
+    }
+    .qr-sticker-preview {
+      max-width: 340px;
+      margin: 1cm auto;
+      border: 2px dashed #000;
+    }
+  }
+</style>

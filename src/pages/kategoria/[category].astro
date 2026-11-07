@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getAllPosts } from '../../utils/posts';
+
+export function getStaticPaths() {
+  return [
+    {
+      params: { category: 'moje-prace' },
+      props: {
+        title: '📚 Moje Prace – Wypracowania i Projekty (ZST w Lipnie)',
+        subtitle: 'Multimedialne wersje wypracowań i prac szkolnych wzbogacone o filmy, schematy techniczne oraz kody QR do zeszytu.',
+        filterCategories: ['moje-prace'],
+        navKey: 'moje-prace' as const,
+      },
+    },
+    {
+      params: { category: 'motoryzacja' },
+      props: {
+        title: '🔧 Garaż, Silniki & Warsztat ZST Lipno',
+        subtitle: 'Artykuły z mechaniki samochodowej, diagnostyki OBD2, budowy silników i praktyki warsztatowej.',
+        filterCategories: ['motoryzacja', 'warsztat'],
+        navKey: 'motoryzacja' as const,
+      },
+    },
+    {
+      params: { category: 'hobby' },
+      props: {
+        title: '🎮 Po Godzinach – Hobby',
+        subtitle: 'Luźne wpisy po szkole.',
+        filterCategories: ['hobby'],
+        navKey: 'home' as const,
+      },
+    },
+  ];
+}
+
+const { title, subtitle, filterCategories, navKey } = Astro.props;
+const posts = getAllPosts().filter((p) => filterCategories.includes(p.frontmatter.category));
+---
+
+<BaseLayout title={title} activeNav={navKey}>
+  <section class="container" style="padding: 3rem 1.25rem;">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title" style="font-size: 2.1rem; margin-bottom: 0.4rem;">{title}</h1>
+        <p class="section-subtitle">{subtitle}</p>
+      </div>
+      <a href="/" class="btn btn-outline">← Wszystkie wpisy</a>
+    </div>
+
+    {posts.length > 0 ? (
+      <div class="posts-grid">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    ) : (
+      <div class="prose" style="text-align: center; padding: 3rem;">
+        <p>Brak wpisów w tej kategorii. Możesz dodać pierwszy wpis w <a href="/admin" style="color: var(--accent-garage); font-weight: 700;">Panelu Admina (/admin)</a>.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>

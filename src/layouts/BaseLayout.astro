@@ -1,0 +1,140 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  focusKeyword?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  robots?: string;
+  activeNav?: 'home' | 'moje-prace' | 'motoryzacja' | 'warsztat';
+}
+
+const {
+  title,
+  description = 'Blog osobisty Igora Wielgusa – mechanika samochodowa, wypracowania i prace szkolne (Szkoła Branżowa ZST w Lipnie).',
+  seoTitle,
+  seoDescription,
+  focusKeyword,
+  canonicalUrl,
+  ogImage,
+  robots = 'index, follow',
+  activeNav = 'home',
+} = Astro.props;
+
+const finalTitle = seoTitle || `${title} | Igor Wielgus`;
+const finalDesc = seoDescription || description;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{finalTitle}</title>
+    <meta name="description" content={finalDesc} />
+    <meta name="robots" content={robots} />
+    {focusKeyword && <meta name="keywords" content={focusKeyword} />}
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    <meta property="og:title" content={finalTitle} />
+    <meta property="og:description" content={finalDesc} />
+    <meta property="og:type" content="article" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-inner">
+        <a href="/" class="brand">
+          <div class="brand-badge">IW</div>
+          <div class="brand-text">
+            IGOR WIELGUS<span class="dot">.PL</span>
+            <span class="brand-sub">MECHANIKA SAMOCHODOWA • ZST LIPNO</span>
+          </div>
+        </a>
+
+        <button
+          type="button"
+          class="hamburger-btn"
+          id="hamburger-btn"
+          aria-label="Otwórz menu nawigacji"
+          aria-expanded="false"
+          aria-controls="main-nav"
+        >
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+
+        <nav id="main-nav" class="main-nav" aria-label="Główna nawigacja">
+          <ul class="nav-links">
+            <li>
+              <a href="/" class:list={['nav-link', { active: activeNav === 'home' }]}>
+                🏠 Start
+              </a>
+            </li>
+            <li>
+              <a href="/kategoria/moje-prace" class:list={['nav-link works', { active: activeNav === 'moje-prace' }]}>
+                📚 Moje Prace
+              </a>
+            </li>
+            <li>
+              <a href="/kategoria/motoryzacja" class:list={['nav-link garage', { active: activeNav === 'motoryzacja' }]}>
+                🔧 Garaż & Mechanika
+              </a>
+            </li>
+            <li>
+              <a href="/narzedzia" class:list={['nav-link', { active: activeNav === 'warsztat' }]}>
+                ⚙️ Kalkulator & Quizy
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <strong>Igor Wielgus</strong> • Mechanik Pojazdów Samochodowych (Szkoła Branżowa w ZST w Lipnie – 2. rok)
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <span>Nauka przez tworzenie</span>
+          <a href="/admin" class="admin-footer-link">🔒 Panel Admina (CMS)</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const hamburgerBtn = document.getElementById('hamburger-btn');
+      const mainNav = document.getElementById('main-nav');
+
+      function closeMenu() {
+        hamburgerBtn?.classList.remove('is-open');
+        mainNav?.classList.remove('is-open');
+        hamburgerBtn?.setAttribute('aria-expanded', 'false');
+      }
+
+      hamburgerBtn?.addEventListener('click', () => {
+        const isOpen = hamburgerBtn.classList.toggle('is-open');
+        mainNav?.classList.toggle('is-open', isOpen);
+        hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      mainNav?.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMenu();
+      });
+    </script>
+  </body>
+</html>

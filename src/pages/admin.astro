@@ -1,0 +1,1751 @@
+---
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Admina (CMS) | Igor Wielgus Blog</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="wp-admin-body">
+    <!-- TOP ADMIN BAR (WordPress style) -->
+    <header class="wp-topbar">
+      <div class="wp-topbar-left">
+        <a href="/" class="wp-brand">
+          <span class="wp-badge">IW</span>
+          <strong>igorwielgus.pl</strong>
+          <span class="wp-visit-site">🏠 Zobacz witrynę</span>
+        </a>
+        <button type="button" class="wp-top-btn" id="top-new-post-btn">
+          ➕ Nowy wpis
+        </button>
+      </div>
+      <div class="wp-topbar-right">
+        <span class="wp-status-indicator" id="cms-status-pill">🟢 Połączono z lokalnym CMS</span>
+        <span class="wp-user-Chip">👤 Igor Wielgus (Administrator)</span>
+      </div>
+    </header>
+
+    <div class="wp-layout">
+      <!-- LEFT SIDEBAR -->
+      <aside class="wp-sidebar">
+        <nav class="wp-nav">
+          <button type="button" class="wp-nav-item active" data-view-btn="list">
+            <span>📋</span> Wszystkie wpisy
+          </button>
+          <button type="button" class="wp-nav-item" data-view-btn="editor" id="nav-new-post-btn">
+            <span>✏️</span> Dodaj nowy wpis
+          </button>
+          <button type="button" class="wp-nav-item" data-view-btn="categories">
+            <span>📁</span> Kategorie (Moje Prace)
+          </button>
+          <div class="wp-nav-divider"></div>
+          <a href="/kategoria/moje-prace" class="wp-nav-item" target="_blank">
+            <span>📚</span> Podgląd: Moje Prace ↗
+          </a>
+          <a href="/blog/skrzynie-biegow-wypracowanie" class="wp-nav-item" target="_blank">
+            <span>📱</span> Wypracowanie: Skrzynie Biegów ↗
+          </a>
+          <a href="/" class="wp-nav-item">
+            <span>⬅️</span> Wróć na stronę główną
+          </a>
+        </nav>
+      </aside>
+
+      <!-- MAIN WORKSPACE -->
+      <main class="wp-main">
+        <!-- VIEW 1: POSTS LIST -->
+        <section id="view-list" class="wp-view">
+          <div class="wp-view-header">
+            <div>
+              <h1>Wpisy na blogu</h1>
+              <p>Zarządzaj wszystkimi artykułami, wypracowaniami w kategorii „Moje Prace” oraz ustawieniami SEO.</p>
+            </div>
+            <button type="button" class="btn btn-garage" id="header-new-post-btn">
+              ➕ Dodaj nowy wpis
+            </button>
+          </div>
+
+          <div class="wp-filter-tabs" id="list-category-filters">
+            <button type="button" class="wp-tab active" data-filter-cat="all">Wszystkie</button>
+            <button type="button" class="wp-tab" data-filter-cat="moje-prace">📚 Moje Prace</button>
+            <button type="button" class="wp-tab" data-filter-cat="motoryzacja">🔧 Garaż & Mechanika</button>
+            <button type="button" class="wp-tab" data-filter-cat="warsztat">🛠️ Warsztat ZST</button>
+            <button type="button" class="wp-tab" data-filter-cat="hobby">🎮 Po Godzinach</button>
+          </div>
+
+          <div class="wp-table-card">
+            <table class="wp-table">
+              <thead>
+                <tr>
+                  <th>Tytuł wpisu</th>
+                  <th>Kategoria</th>
+                  <th>Tagi</th>
+                  <th>Data</th>
+                  <th>Wynik SEO</th>
+                  <th style="text-align: right;">Akcje</th>
+                </tr>
+              </thead>
+              <tbody id="posts-table-body">
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 2rem;">Ładowanie wpisów...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VIEW 2: WORDPRESS-STYLE POST EDITOR + SEO SUITE -->
+        <section id="view-editor" class="wp-view" hidden>
+          <div class="wp-view-header">
+            <div>
+              <h1 id="editor-heading">Dodaj nowy wpis</h1>
+              <p>Edytor wizualny typu WordPress z pełną konfiguracją SEO, multimediami i kodem QR.</p>
+            </div>
+            <div style="display: flex; gap: 0.6rem;">
+              <button type="button" class="btn btn-outline" id="back-to-list-btn">
+                ← Lista wpisów
+              </button>
+              <button type="button" class="btn btn-garage" id="top-save-btn">
+                💾 Zapisz i Opublikuj
+              </button>
+            </div>
+          </div>
+
+          <div id="save-toast" class="wp-toast" hidden></div>
+
+          <div class="wp-editor-grid">
+            <!-- LEFT COLUMN: TITLE, PERMALINK, WYSIWYG EDITOR, SEO METABOX -->
+            <div class="wp-editor-main">
+              <!-- Title & Slug Box -->
+              <div class="wp-panel">
+                <input
+                  type="text"
+                  id="post-title"
+                  class="wp-title-input"
+                  placeholder="Wpisz tytuł artykułu lub wypracowania..."
+                />
+                <div class="wp-permalink-row">
+                  <span>🔗 Bezpośredni odnośnik (URL): <code>https://igorwielgus.pl/blog/</code></span>
+                  <input type="text" id="post-slug" class="wp-slug-input" placeholder="moj-nowy-wpis" />
+                  <a href="#" id="preview-live-link" target="_blank" class="wp-link-small" hidden>Otwórz wpis ↗</a>
+                </div>
+              </div>
+
+              <!-- Excerpt / Short lead -->
+              <div class="wp-panel">
+                <label class="wp-label" for="post-desc">Krótka zajawka artykułu (widoczna na kafelku na stronie głównej)</label>
+                <textarea
+                  id="post-desc"
+                  rows="2"
+                  class="wp-textarea"
+                  placeholder="Jedno lub dwa zdania podsumowujące o czym jest ten wpis..."
+                ></textarea>
+              </div>
+
+              <!-- WORDPRESS WYSIWYG / CODE EDITOR -->
+              <div class="wp-panel wp-editor-box">
+                <div class="wp-editor-top-bar">
+                  <div class="wp-media-buttons">
+                    <label class="wp-media-upload-btn">
+                      🖼️ Dodaj media (Zdjęcie / Wideo z dysku)
+                      <input type="file" id="media-upload-input" accept="image/*,video/*" hidden />
+                    </label>
+                    <button type="button" class="wp-insert-chip" data-insert-block="qr">📱 + Kod QR do zeszytu</button>
+                    <button type="button" class="wp-insert-chip" data-insert-block="tip">🛠️ + Wskazówka warsztatowa</button>
+                    <button type="button" class="wp-insert-chip" data-insert-block="gearbox">⚙️ + Symulator skrzyni</button>
+                    <button type="button" class="wp-insert-chip" data-insert-block="calc">🔧 + Kalkulator mocy</button>
+                    <button type="button" class="wp-insert-chip" data-insert-block="quiz">⚡ + Quiz wiedzy</button>
+                  </div>
+
+                  <div class="wp-mode-tabs">
+                    <button type="button" class="wp-mode-tab active" data-editor-mode="visual">Wizualny</button>
+                    <button type="button" class="wp-mode-tab" data-editor-mode="code">Tekstowy (MDX / HTML)</button>
+                  </div>
+                </div>
+
+                <!-- Formatting Toolbar (WordPress Classic / Gutenberg style) -->
+                <div class="wp-toolbar" id="wysiwyg-toolbar">
+                  <select id="format-block-select" class="wp-format-select" title="Format akapitu">
+                    <option value="p">Akapit</option>
+                    <option value="h2">Nagłówek 2 (H2)</option>
+                    <option value="h3">Nagłówek 3 (H3)</option>
+                    <option value="h4">Nagłówek 4 (H4)</option>
+                    <option value="blockquote">Cytat</option>
+                  </select>
+
+                  <button type="button" class="wp-tool-btn" data-cmd="bold" title="Pogrubienie (Ctrl+B)"><strong>B</strong></button>
+                  <button type="button" class="wp-tool-btn" data-cmd="italic" title="Kursywa (Ctrl+I)"><em>I</em></button>
+                  <button type="button" class="wp-tool-btn" data-cmd="underline" title="Podkreślenie (Ctrl+U)"><u>U</u></button>
+                  <button type="button" class="wp-tool-btn" data-cmd="strikeThrough" title="Przekreślenie"><s>S</s></button>
+
+                  <span class="wp-sep"></span>
+
+                  <button type="button" class="wp-tool-btn" data-cmd="insertUnorderedList" title="Lista punktowana">• Lista</button>
+                  <button type="button" class="wp-tool-btn" data-cmd="insertOrderedList" title="Lista numerowana">1. Lista</button>
+                  <button type="button" class="wp-tool-btn" data-cmd="justifyLeft" title="Wyrównaj do lewej">⬅</button>
+                  <button type="button" class="wp-tool-btn" data-cmd="justifyCenter" title="Wyśrodkuj">↔</button>
+
+                  <span class="wp-sep"></span>
+
+                  <button type="button" class="wp-tool-btn" id="btn-insert-link" title="Wstaw link">🔗 Link</button>
+                  <button type="button" class="wp-tool-btn" id="btn-insert-table" title="Wstaw tabelę">⊞ Tabela</button>
+                  <button type="button" class="wp-tool-btn" data-cmd="insertHorizontalRule" title="Linia pozioma">― Linia</button>
+                  <button type="button" class="wp-tool-btn" data-cmd="removeFormat" title="Wyczyść formatowanie">⌫</button>
+                </div>
+
+                <!-- Visual Editable Surface -->
+                <div
+                  id="visual-editor"
+                  class="wp-visual-surface prose"
+                  contenteditable="true"
+                  spellcheck="true"
+                >
+                  <p>Zacznij pisać swój artykuł lub wypracowanie tutaj...</p>
+                </div>
+
+                <!-- Raw Code / MDX Surface -->
+                <textarea
+                  id="code-editor"
+                  class="wp-code-surface"
+                  rows="18"
+                  hidden
+                  placeholder="Kod artykułu (MDX / Markdown / HTML)..."
+                ></textarea>
+
+                <div class="wp-editor-statusbar">
+                  <span id="word-count-info">Liczba słów: 0</span>
+                  <span id="reading-time-info">Szacowany czas czytania: 1 min</span>
+                </div>
+              </div>
+
+              <!-- YOAST / RANKMATH STYLE SEO METABOX -->
+              <div class="wp-panel wp-seo-box">
+                <div class="wp-seo-header">
+                  <div>
+                    <h3>🔍 Optymalizacja SEO (w stylu Yoast SEO / WordPress)</h3>
+                    <p>Skonfiguruj jak Twój artykuł wyświetla się w Google oraz w mediach społecznościowych.</p>
+                  </div>
+                  <div class="seo-score-pill" id="seo-score-badge">
+                    SEO: <strong id="seo-score-val">0</strong>/100
+                  </div>
+                </div>
+
+                <!-- Google SERP Snippet Preview -->
+                <div class="serp-preview-wrap">
+                  <div class="serp-preview-top">
+                    <span>Podgląd wyniku w wyszukiwarce Google (SERP):</span>
+                    <div class="serp-device-toggle">
+                      <button type="button" class="serp-dev-btn active" data-serp-dev="desktop">💻 Komputer</button>
+                      <button type="button" class="serp-dev-btn" data-serp-dev="mobile">📱 Telefon</button>
+                    </div>
+                  </div>
+                  <div class="serp-card" id="serp-card">
+                    <div class="serp-site-row">
+                      <span class="serp-favicon">IW</span>
+                      <div>
+                        <div class="serp-site-name">Igor Wielgus</div>
+                        <div class="serp-breadcrumb">https://igorwielgus.pl › blog › <span id="serp-slug">nowy-wpis</span></div>
+                      </div>
+                    </div>
+                    <div class="serp-title" id="serp-title">Tytuł wpisu | Igor Wielgus</div>
+                    <div class="serp-desc" id="serp-desc">Wpisz opis meta lub zajawkę, aby zobaczyć jak strona zaprezentuje się w wynikach wyszukiwania Google.</div>
+                  </div>
+                </div>
+
+                <div class="seo-fields-grid">
+                  <div class="wp-field">
+                    <label for="seo-keyword">🎯 Fraza kluczowa (Focus Keyword)</label>
+                    <input type="text" id="seo-keyword" placeholder="np. skrzynie biegów budowa" />
+                  </div>
+
+                  <div class="wp-field">
+                    <div class="wp-field-label-row">
+                      <label for="seo-title">Tytuł SEO (Meta Title)</label>
+                      <span id="seo-title-count" class="char-counter">0 / 60 znaków</span>
+                    </div>
+                    <input type="text" id="seo-title" placeholder="Domyślnie użyje tytułu wpisu..." />
+                    <div class="seo-meter"><div id="seo-title-bar" class="seo-meter-fill"></div></div>
+                  </div>
+
+                  <div class="wp-field">
+                    <div class="wp-field-label-row">
+                      <label for="seo-desc">Opis Meta (Meta Description)</label>
+                      <span id="seo-desc-count" class="char-counter">0 / 160 znaków</span>
+                    </div>
+                    <textarea id="seo-desc" rows="3" placeholder="Opis dla wyszukiwarki Google (optymalnie 120–160 znaków)..."></textarea>
+                    <div class="seo-meter"><div id="seo-desc-bar" class="seo-meter-fill"></div></div>
+                  </div>
+
+                  <div class="wp-field-row-2">
+                    <div class="wp-field">
+                      <label for="seo-og-image">🖼️ Obrazek wyróżniający (OpenGraph URL)</label>
+                      <input type="text" id="seo-og-image" placeholder="/media/skrzynie-biegow/schemat-mt.jpg" />
+                    </div>
+                    <div class="wp-field">
+                      <label for="seo-robots">🤖 Indeksowanie przez roboty Google</label>
+                      <select id="seo-robots">
+                        <option value="index, follow">Indeksuj i śledź linki (index, follow)</option>
+                        <option value="noindex, follow">Nie indeksuj (noindex, follow)</option>
+                        <option value="noindex, nofollow">Całkowicie ukryj (noindex, nofollow)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="wp-field">
+                    <label for="seo-canonical">🔗 Kanoniczny adres URL (opcjonalnie)</label>
+                    <input type="text" id="seo-canonical" placeholder="https://igorwielgus.pl/blog/..." />
+                  </div>
+                </div>
+
+                <!-- Live SEO Checklist -->
+                <div class="seo-checklist">
+                  <h4>Analiza treści i wskazówki SEO:</h4>
+                  <ul id="seo-checks-list"></ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: PUBLISH, CATEGORY, TAGS -->
+            <aside class="wp-editor-sidebar">
+              <!-- Publish Metabox -->
+              <div class="wp-side-box">
+                <h4>📢 Publikacja</h4>
+                <div class="wp-side-body">
+                  <label class="wp-field">
+                    <span>📅 Data publikacji</span>
+                    <input type="date" id="post-date" />
+                  </label>
+                  <label class="wp-field">
+                    <span>⏱️ Czas czytania</span>
+                    <input type="text" id="post-reading-time" value="5 min" />
+                  </label>
+                  <label class="wp-chk-row">
+                    <input type="checkbox" id="post-featured" checked />
+                    <span>⭐ Wyróżnij ten wpis na stronie głównej</span>
+                  </label>
+
+                  <div class="wp-publish-actions">
+                    <button type="button" class="btn btn-garage" style="width: 100%; justify-content: center;" id="side-save-btn">
+                      💾 Zapisz i Opublikuj wpis
+                    </button>
+                    <button type="button" class="btn btn-outline" style="width: 100%; justify-content: center;" id="download-mdx-btn">
+                      ⬇️ Pobierz plik .mdx
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Categories Metabox -->
+              <div class="wp-side-box">
+                <h4>📁 Kategoria wpisu</h4>
+                <div class="wp-side-body">
+                  <div class="wp-cat-radios">
+                    <label class="wp-cat-option">
+                      <input type="radio" name="post-cat" value="moje-prace" checked />
+                      <div>
+                        <strong>📚 Moje Prace</strong>
+                        <small>Wypracowania i projekty szkolne ZST Lipno</small>
+                      </div>
+                    </label>
+                    <label class="wp-cat-option">
+                      <input type="radio" name="post-cat" value="motoryzacja" />
+                      <div>
+                        <strong>🔧 Garaż & Mechanika</strong>
+                        <small>Budowa silników, podzespoły i poradniki</small>
+                      </div>
+                    </label>
+                    <label class="wp-cat-option">
+                      <input type="radio" name="post-cat" value="warsztat" />
+                      <div>
+                        <strong>🛠️ Warsztat ZST Lipno</strong>
+                        <small>Diagnostyka OBD2 i praktyka warsztatowa</small>
+                      </div>
+                    </label>
+                    <label class="wp-cat-option">
+                      <input type="radio" name="post-cat" value="hobby" />
+                      <div>
+                        <strong>🎮 Po Godzinach (Hobby)</strong>
+                        <small>Luźne wpisy po szkole (np. CS, Euro Truck, Metin)</small>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tags Metabox -->
+              <div class="wp-side-box">
+                <h4>🏷️ Tagi artykułu</h4>
+                <div class="wp-side-body">
+                  <input
+                    type="text"
+                    id="post-tags"
+                    class="wp-tags-input"
+                    value="wypracowanie, ZST-Lipno, mechanika"
+                    placeholder="Tagi oddzielone przecinkami..."
+                  />
+                  <div class="wp-quick-tags">
+                    <span>Szybkie tagi:</span>
+                    <button type="button" class="quick-tag-btn" data-tag="ZST-Lipno">+ ZST-Lipno</button>
+                    <button type="button" class="quick-tag-btn" data-tag="wypracowanie">+ wypracowanie</button>
+                    <button type="button" class="quick-tag-btn" data-tag="skrzynie-biegow">+ skrzynie-biegow</button>
+                    <button type="button" class="quick-tag-btn" data-tag="silniki">+ silniki</button>
+                    <button type="button" class="quick-tag-btn" data-tag="OBD2">+ OBD2</button>
+                    <button type="button" class="quick-tag-btn" data-tag="warsztat">+ warsztat</button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- VIEW 3: CATEGORIES OVERVIEW -->
+        <section id="view-categories" class="wp-view" hidden>
+          <div class="wp-view-header">
+            <div>
+              <h1>Kategorie na blogu</h1>
+              <p>Podział tematyczny bloga Igora Wielgusa.</p>
+            </div>
+          </div>
+
+          <div class="posts-grid">
+            <div class="post-card">
+              <div>
+                <span class="category-badge moje-prace">📚 Kategoria główna</span>
+                <h3 class="post-title" style="margin-top: 0.75rem;">Moje Prace (ZST w Lipnie)</h3>
+                <p class="post-excerpt">
+                  Miejsce na wypracowania i prace szkolne z mechaniki pojazdów samochodowych wzbogacone o filmy, przekroje techniczne i kody QR do zeszytu. Pierwsza praca: <strong>Ewolucja, budowa i zasada działania samochodowych skrzyń biegów</strong>.
+                </p>
+              </div>
+              <a href="/kategoria/moje-prace" target="_blank" class="btn btn-gaming" style="width: fit-content;">Zobacz kategorię →</a>
+            </div>
+
+            <div class="post-card">
+              <div>
+                <span class="category-badge motoryzacja">🔧 Motoryzacja</span>
+                <h3 class="post-title" style="margin-top: 0.75rem;">Garaż & Warsztat</h3>
+                <p class="post-excerpt">
+                  Artykuły techniczne o turbosprężarkach, momencie obrotowym, układach hamulcowych i diagnostyce komputerowej OBD2.
+                </p>
+              </div>
+              <a href="/kategoria/motoryzacja" target="_blank" class="btn btn-garage" style="width: fit-content;">Zobacz kategorię →</a>
+            </div>
+
+            <div class="post-card">
+              <div>
+                <span class="category-badge hobby">🎮 Hobby</span>
+                <h3 class="post-title" style="margin-top: 0.75rem;">Po Godzinach</h3>
+                <p class="post-excerpt">
+                  Opcjonalna kategoria na luźne wpisy po szkole (np. CS, Metin, Euro Truck / Hard Truck).
+                </p>
+              </div>
+              <a href="/kategoria/hobby" target="_blank" class="btn btn-outline" style="width: fit-content;">Zobacz kategorię →</a>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      interface AdminPost {
+        slug: string;
+        frontmatter: Record<string, any>;
+        body: string;
+      }
+
+      let allPosts: AdminPost[] = [];
+      let currentFilterCat = 'all';
+      let editingOriginalSlug: string | null = null;
+      let editorMode: 'visual' | 'code' = 'visual';
+
+      // Views
+      const viewList = document.getElementById('view-list')!;
+      const viewEditor = document.getElementById('view-editor')!;
+      const viewCategories = document.getElementById('view-categories')!;
+      const navBtns = document.querySelectorAll('[data-view-btn]');
+
+      // Editor inputs
+      const titleInput = document.getElementById('post-title') as HTMLInputElement;
+      const slugInput = document.getElementById('post-slug') as HTMLInputElement;
+      const descInput = document.getElementById('post-desc') as HTMLTextAreaElement;
+      const visualEditor = document.getElementById('visual-editor') as HTMLElement;
+      const codeEditor = document.getElementById('code-editor') as HTMLTextAreaElement;
+      const dateInput = document.getElementById('post-date') as HTMLInputElement;
+      const readingTimeInput = document.getElementById('post-reading-time') as HTMLInputElement;
+      const featuredInput = document.getElementById('post-featured') as HTMLInputElement;
+      const tagsInput = document.getElementById('post-tags') as HTMLInputElement;
+
+      // SEO inputs
+      const seoKeyword = document.getElementById('seo-keyword') as HTMLInputElement;
+      const seoTitle = document.getElementById('seo-title') as HTMLInputElement;
+      const seoDesc = document.getElementById('seo-desc') as HTMLTextAreaElement;
+      const seoOgImage = document.getElementById('seo-og-image') as HTMLInputElement;
+      const seoRobots = document.getElementById('seo-robots') as HTMLSelectElement;
+      const seoCanonical = document.getElementById('seo-canonical') as HTMLInputElement;
+
+      dateInput.value = new Date().toISOString().slice(0, 10);
+
+      function slugify(text: string): string {
+        const map: Record<string, string> = {
+          ą: 'a', ć: 'c', ę: 'e', ł: 'l', ń: 'n', ó: 'o', ś: 's', ź: 'z', ż: 'z',
+          Ą: 'a', Ć: 'c', Ę: 'e', Ł: 'l', Ń: 'n', Ó: 'o', Ś: 's', Ź: 'z', Ż: 'z',
+        };
+        return text
+          .split('')
+          .map((ch) => map[ch] || ch)
+          .join('')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '') || 'nowy-wpis';
+      }
+
+      function switchView(view: 'list' | 'editor' | 'categories') {
+        viewList.hidden = view !== 'list';
+        viewEditor.hidden = view !== 'editor';
+        viewCategories.hidden = view !== 'categories';
+        navBtns.forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-view-btn') === view);
+        });
+      }
+
+      navBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-view-btn') as 'list' | 'editor' | 'categories';
+          if (target === 'editor' && !editingOriginalSlug) {
+            resetEditorForNewPost();
+          }
+          switchView(target);
+        });
+      });
+
+      document.getElementById('top-new-post-btn')?.addEventListener('click', () => {
+        resetEditorForNewPost();
+        switchView('editor');
+      });
+      document.getElementById('header-new-post-btn')?.addEventListener('click', () => {
+        resetEditorForNewPost();
+        switchView('editor');
+      });
+      document.getElementById('back-to-list-btn')?.addEventListener('click', () => {
+        editingOriginalSlug = null;
+        switchView('list');
+      });
+
+      function getSelectedCategory(): string {
+        const checked = document.querySelector('input[name="post-cat"]:checked') as HTMLInputElement;
+        return checked ? checked.value : 'moje-prace';
+      }
+
+      function setSelectedCategory(cat: string) {
+        const radio = document.querySelector(`input[name="post-cat"][value="${cat}"]`) as HTMLInputElement;
+        if (radio) radio.checked = true;
+      }
+
+      function getEditorContent(): string {
+        return editorMode === 'visual' ? visualEditor.innerHTML.trim() : codeEditor.value.trim();
+      }
+
+      function setEditorContent(content: string) {
+        codeEditor.value = content;
+        // If content is markdown/MDX with ## headings, render basic HTML for visual editor or preserve HTML
+        if (!content.trim().startsWith('<') && content.includes('## ')) {
+          const html = content
+            .replace(/^### (.*)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.*)$/gm, '<h2>$1</h2>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .split(/\n\n+/)
+            .map((block) => {
+              const t = block.trim();
+              if (!t) return '';
+              if (t.startsWith('<') || t.startsWith('import ')) return `<div class="mdx-raw-block">${t.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+              return `<p>${t}</p>`;
+            })
+            .join('\n');
+          visualEditor.innerHTML = html;
+        } else {
+          visualEditor.innerHTML = content || '<p></p>';
+        }
+        updateWordCountAndSeo();
+      }
+
+      // Mode switch (Visual <-> Code)
+      document.querySelectorAll('[data-editor-mode]').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const targetMode = tab.getAttribute('data-editor-mode') as 'visual' | 'code';
+          if (targetMode === editorMode) return;
+
+          document.querySelectorAll('[data-editor-mode]').forEach((t) => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          const toolbar = document.getElementById('wysiwyg-toolbar')!;
+          if (targetMode === 'code') {
+            // Only overwrite codeEditor if user edited visual mode and it doesn't contain raw MDX imports
+            if (!codeEditor.value.includes('import ')) {
+              codeEditor.value = visualEditor.innerHTML
+                .replace(/<\/p>/gi, '</p>\n\n')
+                .replace(/<\/h2>/gi, '</h2>\n\n')
+                .replace(/<\/h3>/gi, '</h3>\n\n')
+                .trim();
+            }
+            visualEditor.hidden = true;
+            toolbar.style.display = 'none';
+            codeEditor.hidden = false;
+          } else {
+            visualEditor.innerHTML = codeEditor.value;
+            codeEditor.hidden = true;
+            visualEditor.hidden = false;
+            toolbar.style.display = 'flex';
+          }
+          editorMode = targetMode;
+          updateWordCountAndSeo();
+        });
+      });
+
+      // WYSIWYG Toolbar Commands
+      document.querySelectorAll('[data-cmd]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const cmd = btn.getAttribute('data-cmd')!;
+          document.execCommand(cmd, false);
+          visualEditor.focus();
+          codeEditor.value = visualEditor.innerHTML;
+          updateWordCountAndSeo();
+        });
+      });
+
+      const formatSelect = document.getElementById('format-block-select') as HTMLSelectElement;
+      formatSelect?.addEventListener('change', () => {
+        document.execCommand('formatBlock', false, `<${formatSelect.value}>`);
+        visualEditor.focus();
+        codeEditor.value = visualEditor.innerHTML;
+        updateWordCountAndSeo();
+      });
+
+      document.getElementById('btn-insert-link')?.addEventListener('click', () => {
+        const url = prompt('Podaj adres URL linku:', 'https://');
+        if (url) {
+          document.execCommand('createLink', false, url);
+          codeEditor.value = visualEditor.innerHTML;
+        }
+      });
+
+      document.getElementById('btn-insert-table')?.addEventListener('click', () => {
+        const tableHtml = `
+          <table style="width:100%; border-collapse: collapse; margin: 1rem 0;">
+            <thead>
+              <tr style="border-bottom: 2px solid #334155;">
+                <th style="padding: 8px; text-align: left;">Parametr / Typ</th>
+                <th style="padding: 8px; text-align: left;">Opis techniczny</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid #1e293b;">
+                <td style="padding: 8px;">Wartość 1</td>
+                <td style="padding: 8px;">Szczegóły...</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px;">Wartość 2</td>
+                <td style="padding: 8px;">Szczegóły...</td>
+              </tr>
+            </tbody>
+          </table><p></p>`;
+        if (editorMode === 'visual') {
+          visualEditor.focus();
+          document.execCommand('insertHTML', false, tableHtml);
+          codeEditor.value = visualEditor.innerHTML;
+        } else {
+          codeEditor.value += '\n' + tableHtml;
+        }
+      });
+
+      // Insert interactive blocks
+      document.querySelectorAll('[data-insert-block]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const type = btn.getAttribute('data-insert-block');
+          let snippet = '';
+          let importStmt = '';
+
+          if (type === 'qr') {
+            importStmt = `import QrCodeNotebookCard from '../../components/QrCodeNotebookCard.astro';`;
+            snippet = `\n<QrCodeNotebookCard defaultUrl="https://igorwielgus.pl/blog/${slugInput.value || 'nowy-wpis'}" essayTitle="${titleInput.value || 'Tytuł wypracowania'}" />\n`;
+          } else if (type === 'tip') {
+            importStmt = `import WorkshopTip from '../../components/WorkshopTip.astro';`;
+            snippet = `\n<WorkshopTip title="Wskazówka z warsztatu ZST Lipno" type="warsztat">\n  Wpisz tutaj praktyczną wskazówkę warsztatową.\n</WorkshopTip>\n`;
+          } else if (type === 'gearbox') {
+            importStmt = `import GearboxSimulator from '../../components/GearboxSimulator.astro';`;
+            snippet = `\n<GearboxSimulator />\n`;
+          } else if (type === 'calc') {
+            importStmt = `import PowerCalculator from '../../components/PowerCalculator.astro';`;
+            snippet = `\n<PowerCalculator defaultTorque={320} defaultRpm={4200} defaultWeight={1380} />\n`;
+          } else if (type === 'quiz') {
+            importStmt = `import MechanicQuiz from '../../components/MechanicQuiz.astro';`;
+            snippet = `\n<MechanicQuiz title="Sprawdź wiedzę z artykułu!" questions={[{ question: "Pytanie testowe?", options: ["Odpowiedź A", "Odpowiedź B", "Odpowiedź C"], correctIndex: 0, explanation: "Wyjaśnienie poprawnej odpowiedzi." }]} />\n`;
+          }
+
+          // Switch to code view so MDX component syntax is clean
+          const codeTab = document.querySelector('[data-editor-mode="code"]') as HTMLElement;
+          codeTab?.click();
+          if (importStmt && !codeEditor.value.includes(importStmt)) {
+            codeEditor.value = `${importStmt}\n\n${codeEditor.value}`;
+          }
+          codeEditor.value += `\n${snippet}`;
+          updateWordCountAndSeo();
+        });
+      });
+
+      // Media Upload from disk
+      const mediaUploadInput = document.getElementById('media-upload-input') as HTMLInputElement;
+      mediaUploadInput?.addEventListener('change', async () => {
+        const file = mediaUploadInput.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const dataUrl = String(reader.result);
+          const res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, dataUrl }),
+          });
+          const data = await res.json();
+          if (data.ok) {
+            const isVideo = file.type.startsWith('video/');
+            const mediaHtml = isVideo
+              ? `<figure class="media-card"><video controls class="transmission-video" src="${data.url}"></video><figcaption>${file.name}</figcaption></figure><p></p>`
+              : `<figure class="blueprint-figure"><img src="${data.url}" alt="${file.name}" /><figcaption>Opis zdjęcia: ${file.name}</figcaption></figure><p></p>`;
+
+            if (editorMode === 'visual') {
+              visualEditor.focus();
+              document.execCommand('insertHTML', false, mediaHtml);
+              codeEditor.value = visualEditor.innerHTML;
+            } else {
+              codeEditor.value += '\n' + mediaHtml;
+            }
+            if (!seoOgImage.value && !isVideo) {
+              seoOgImage.value = data.url;
+            }
+            showToast(`✅ Wgrano plik: ${data.url}`);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Quick tags
+      document.querySelectorAll('.quick-tag-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const tag = btn.getAttribute('data-tag')!;
+          const existing = tagsInput.value
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean);
+          if (!existing.includes(tag)) {
+            existing.push(tag);
+            tagsInput.value = existing.join(', ');
+          }
+        });
+      });
+
+      // Title -> auto-slug
+      titleInput.addEventListener('input', () => {
+        if (!editingOriginalSlug) {
+          slugInput.value = slugify(titleInput.value);
+        }
+        updateWordCountAndSeo();
+      });
+
+      [slugInput, descInput, visualEditor, codeEditor, seoKeyword, seoTitle, seoDesc].forEach((el) => {
+        el?.addEventListener('input', () => {
+          if (el === visualEditor && !codeEditor.value.includes('import ')) {
+            codeEditor.value = visualEditor.innerHTML;
+          }
+          updateWordCountAndSeo();
+        });
+      });
+
+      // SERP device toggle
+      document.querySelectorAll('[data-serp-dev]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-serp-dev]').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          const serpCard = document.getElementById('serp-card')!;
+          serpCard.classList.toggle('mobile', btn.getAttribute('data-serp-dev') === 'mobile');
+        });
+      });
+
+      function updateWordCountAndSeo() {
+        const rawText = (editorMode === 'visual' ? visualEditor.innerText : codeEditor.value)
+          .replace(/<[^>]+>/g, ' ')
+          .trim();
+        const words = rawText ? rawText.split(/\s+/).length : 0;
+        const mins = Math.max(1, Math.ceil(words / 180));
+
+        document.getElementById('word-count-info')!.textContent = `Liczba słów: ${words}`;
+        document.getElementById('reading-time-info')!.textContent = `Szacowany czas czytania: ${mins} min`;
+
+        const effectiveTitle = seoTitle.value.trim() || (titleInput.value.trim() ? `${titleInput.value.trim()} | Igor Wielgus` : 'Tytuł wpisu | Igor Wielgus');
+        const effectiveDesc = seoDesc.value.trim() || descInput.value.trim() || 'Brak opisu meta – dodaj opis, aby zwiększyć klikalność w wyszukiwarce Google.';
+        const slug = slugInput.value.trim() || 'nowy-wpis';
+
+        document.getElementById('serp-slug')!.textContent = slug;
+        document.getElementById('serp-title')!.textContent = effectiveTitle;
+        document.getElementById('serp-desc')!.textContent = effectiveDesc;
+
+        // Character counters & meters
+        const tLen = effectiveTitle.length;
+        const dLen = effectiveDesc.length;
+        document.getElementById('seo-title-count')!.textContent = `${tLen} / 60 znaków`;
+        document.getElementById('seo-desc-count')!.textContent = `${dLen} / 160 znaków`;
+
+        const tBar = document.getElementById('seo-title-bar')!;
+        tBar.style.width = `${Math.min(100, (tLen / 60) * 100)}%`;
+        tBar.style.background = tLen >= 35 && tLen <= 65 ? '#22c55e' : '#f59e0b';
+
+        const dBar = document.getElementById('seo-desc-bar')!;
+        dBar.style.width = `${Math.min(100, (dLen / 160) * 100)}%`;
+        dBar.style.background = dLen >= 100 && dLen <= 165 ? '#22c55e' : '#f59e0b';
+
+        // SEO Score calculation
+        const kw = seoKeyword.value.trim().toLowerCase();
+        const checks: { ok: boolean; text: string }[] = [];
+        let score = 0;
+
+        if (titleInput.value.trim().length >= 15) {
+          score += 20;
+          checks.push({ ok: true, text: '🟢 Tytuł artykułu ma odpowiednią długość.' });
+        } else {
+          checks.push({ ok: false, text: '🟠 Tytuł artykułu jest zbyt krótki (minimum 15 znaków).' });
+        }
+
+        if (dLen >= 90 && dLen <= 170) {
+          score += 20;
+          checks.push({ ok: true, text: '🟢 Opis Meta (Meta Description) ma optymalną długość dla Google.' });
+        } else {
+          checks.push({ ok: false, text: '🟠 Opis Meta powinien mieć od 90 do 160 znaków.' });
+        }
+
+        if (words >= 150) {
+          score += 25;
+          checks.push({ ok: true, text: `🟢 Dobra długość tekstu (${words} słów).` });
+        } else {
+          checks.push({ ok: false, text: `🟠 Artykuł ma obecnie ${words} słów (zalecane min. 150 słów).` });
+        }
+
+        if (kw) {
+          const inTitle = effectiveTitle.toLowerCase().includes(kw);
+          const inDesc = effectiveDesc.toLowerCase().includes(kw);
+          if (inTitle && inDesc) {
+            score += 20;
+            checks.push({ ok: true, text: `🟢 Fraza kluczowa „${kw}” występuje w tytule oraz w opisie meta.` });
+          } else {
+            score += 10;
+            checks.push({ ok: false, text: `🟠 Dodaj frazę kluczową „${kw}” zarówno w tytule SEO, jak i w opisie meta.` });
+          }
+        } else {
+          checks.push({ ok: false, text: '🟠 Uzupełnij pole „Fraza kluczowa (Focus Keyword)”, aby ocenić dopasowanie słów kluczowych.' });
+        }
+
+        const hasHeadings = codeEditor.value.includes('<h2') || codeEditor.value.includes('## ') || visualEditor.innerHTML.includes('<h2');
+        if (hasHeadings) {
+          score += 15;
+          checks.push({ ok: true, text: '🟢 Artykuł zawiera podtytuły (nagłówki H2) ułatwiające czytanie.' });
+        } else {
+          checks.push({ ok: false, text: '🟠 Dodaj przynajmniej jeden nagłówek H2 w treści wpisu.' });
+        }
+
+        document.getElementById('seo-score-val')!.textContent = String(score);
+        const badge = document.getElementById('seo-score-badge')!;
+        badge.style.borderColor = score >= 75 ? '#22c55e' : score >= 45 ? '#f59e0b' : '#ef4444';
+
+        const listEl = document.getElementById('seo-checks-list')!;
+        listEl.innerHTML = checks.map((c) => `<li>${c.text}</li>`).join('');
+      }
+
+      function resetEditorForNewPost() {
+        editingOriginalSlug = null;
+        document.getElementById('editor-heading')!.textContent = 'Dodaj nowy wpis';
+        titleInput.value = '';
+        slugInput.value = '';
+        descInput.value = '';
+        seoKeyword.value = '';
+        seoTitle.value = '';
+        seoDesc.value = '';
+        seoOgImage.value = '';
+        seoCanonical.value = '';
+        seoRobots.value = 'index, follow';
+        dateInput.value = new Date().toISOString().slice(0, 10);
+        readingTimeInput.value = '5 min';
+        featuredInput.checked = true;
+        setSelectedCategory('moje-prace');
+        tagsInput.value = 'wypracowanie, ZST-Lipno, mechanika';
+        setEditorContent('<p>Wpisz tutaj treść swojego artykułu lub wypracowania...</p>');
+        (document.getElementById('preview-live-link') as HTMLElement).hidden = true;
+      }
+
+      function loadPostIntoEditor(post: AdminPost) {
+        editingOriginalSlug = post.slug;
+        document.getElementById('editor-heading')!.textContent = `Edycja wpisu: ${post.frontmatter.title || post.slug}`;
+        titleInput.value = post.frontmatter.title || '';
+        slugInput.value = post.slug;
+        descInput.value = post.frontmatter.description || '';
+        dateInput.value = post.frontmatter.date || new Date().toISOString().slice(0, 10);
+        readingTimeInput.value = post.frontmatter.readingTime || '5 min';
+        featuredInput.checked = Boolean(post.frontmatter.featured);
+        setSelectedCategory(post.frontmatter.category || 'moje-prace');
+        tagsInput.value = Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags.join(', ') : '';
+
+        seoKeyword.value = post.frontmatter.focusKeyword || '';
+        seoTitle.value = post.frontmatter.seoTitle || '';
+        seoDesc.value = post.frontmatter.seoDescription || '';
+        seoOgImage.value = post.frontmatter.ogImage || '';
+        seoCanonical.value = post.frontmatter.canonicalUrl || '';
+        seoRobots.value = post.frontmatter.robots || 'index, follow';
+
+        const previewLink = document.getElementById('preview-live-link') as HTMLAnchorElement;
+        previewLink.href = `/blog/${post.slug}`;
+        previewLink.hidden = false;
+
+        // If the post uses MDX imports, open in Code mode or preserve MDX
+        codeEditor.value = post.body.trim();
+        if (post.body.includes('import ')) {
+          const codeTab = document.querySelector('[data-editor-mode="code"]') as HTMLElement;
+          codeTab?.click();
+        } else {
+          setEditorContent(post.body.trim());
+        }
+        updateWordCountAndSeo();
+        switchView('editor');
+      }
+
+      function showToast(msg: string) {
+        const toast = document.getElementById('save-toast')!;
+        toast.textContent = msg;
+        toast.hidden = false;
+        setTimeout(() => {
+          toast.hidden = true;
+        }, 4500);
+      }
+
+      async function savePost() {
+        const title = titleInput.value.trim() || 'Nowy wpis bez tytułu';
+        const slug = slugInput.value.trim() || slugify(title);
+        const description = descInput.value.trim() || seoDesc.value.trim() || title;
+        const body = editorMode === 'code' || codeEditor.value.includes('import ')
+          ? codeEditor.value.trim()
+          : visualEditor.innerHTML.trim();
+
+        const payload = {
+          originalSlug: editingOriginalSlug,
+          slug,
+          title,
+          description,
+          date: dateInput.value,
+          category: getSelectedCategory(),
+          tags: tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean),
+          readingTime: readingTimeInput.value.trim() || '5 min',
+          featured: featuredInput.checked,
+          seoTitle: seoTitle.value.trim(),
+          seoDescription: seoDesc.value.trim(),
+          focusKeyword: seoKeyword.value.trim(),
+          ogImage: seoOgImage.value.trim(),
+          canonicalUrl: seoCanonical.value.trim(),
+          robots: seoRobots.value,
+          body,
+        };
+
+        const res = await fetch('/api/admin/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          editingOriginalSlug = data.slug;
+          const previewLink = document.getElementById('preview-live-link') as HTMLAnchorElement;
+          previewLink.href = data.url;
+          previewLink.hidden = false;
+          showToast(`✅ Zapisano i opublikowano wpis! Adres: ${data.url}`);
+          await fetchPosts();
+        } else {
+          showToast(`❌ Błąd zapisu: ${data.error}`);
+        }
+      }
+
+      document.getElementById('top-save-btn')?.addEventListener('click', savePost);
+      document.getElementById('side-save-btn')?.addEventListener('click', savePost);
+
+      document.getElementById('download-mdx-btn')?.addEventListener('click', () => {
+        const slug = slugInput.value.trim() || 'nowy-wpis';
+        const content = codeEditor.value || visualEditor.innerHTML;
+        const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${slug}.mdx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      async function fetchPosts() {
+        try {
+          const res = await fetch('/api/admin/posts');
+          const data = await res.json();
+          if (data.ok) {
+            allPosts = data.posts;
+            renderPostsTable();
+
+            // Check if URL has ?edit=slug
+            const params = new URLSearchParams(window.location.search);
+            const editSlug = params.get('edit');
+            if (editSlug) {
+              const found = allPosts.find((p) => p.slug === editSlug);
+              if (found) {
+                loadPostIntoEditor(found);
+                window.history.replaceState({}, '', '/admin');
+              }
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      function renderPostsTable() {
+        const tbody = document.getElementById('posts-table-body')!;
+        const filtered = currentFilterCat === 'all'
+          ? allPosts
+          : allPosts.filter((p) => p.frontmatter.category === currentFilterCat);
+
+        const catBadgeMap: Record<string, string> = {
+          'moje-prace': '<span class="category-badge moje-prace">📚 Moje Prace</span>',
+          motoryzacja: '<span class="category-badge motoryzacja">🔧 Garaż & Mechanika</span>',
+          warsztat: '<span class="category-badge warsztat">🛠️ Warsztat ZST</span>',
+          hobby: '<span class="category-badge hobby">🎮 Po Godzinach</span>',
+        };
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Brak wpisów w tej kategorii.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = filtered
+          .map((p) => {
+            const tags = Array.isArray(p.frontmatter.tags) ? p.frontmatter.tags.slice(0, 3).map((t: string) => `<span class="tag">#${t}</span>`).join(' ') : '';
+            const hasSeo = Boolean(p.frontmatter.seoTitle || p.frontmatter.description);
+            const seoDot = hasSeo
+              ? '<span style="color:#22c55e; font-weight:700;">🟢 Dobry</span>'
+              : '<span style="color:#f59e0b; font-weight:700;">🟠 Podstawowy</span>';
+
+            return `
+              <tr>
+                <td>
+                  <strong style="font-size: 0.98rem; color: #fff; display: block;">${p.frontmatter.title || p.slug}</strong>
+                  <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">/blog/${p.slug}</span>
+                </td>
+                <td>${catBadgeMap[p.frontmatter.category] || p.frontmatter.category}</td>
+                <td><div class="tag-list">${tags}</div></td>
+                <td style="font-family: var(--font-mono); font-size: 0.82rem;">${p.frontmatter.date || '-'}</td>
+                <td style="font-size: 0.84rem;">${seoDot}</td>
+                <td style="text-align: right; white-space: nowrap;">
+                  <button type="button" class="wp-action-btn edit" data-edit-slug="${p.slug}">✏️ Edytuj</button>
+                  <a href="/blog/${p.slug}" target="_blank" class="wp-action-btn">👁️ Zobacz</a>
+                  <button type="button" class="wp-action-btn delete" data-del-slug="${p.slug}">🗑️</button>
+                </td>
+              </tr>
+            `;
+          })
+          .join('');
+
+        tbody.querySelectorAll('[data-edit-slug]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const slug = btn.getAttribute('data-edit-slug');
+            const found = allPosts.find((p) => p.slug === slug);
+            if (found) loadPostIntoEditor(found);
+          });
+        });
+
+        tbody.querySelectorAll('[data-del-slug]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const slug = btn.getAttribute('data-del-slug');
+            if (!slug || !confirm(`Czy na pewno chcesz usunąć wpis „${slug}”?`)) return;
+            const res = await fetch(`/api/admin/posts?slug=${encodeURIComponent(slug)}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.ok) fetchPosts();
+          });
+        });
+      }
+
+      document.querySelectorAll('[data-filter-cat]').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('[data-filter-cat]').forEach((t) => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentFilterCat = tab.getAttribute('data-filter-cat') || 'all';
+          renderPostsTable();
+        });
+      });
+
+      fetchPosts();
+      updateWordCountAndSeo();
+    </script>
+
+    <style>
+      .wp-admin-body {
+        background: #0b0e15;
+        color: var(--text-primary);
+      }
+      .wp-topbar {
+        height: 52px;
+        background: #111622;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.25rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .wp-topbar-left, .wp-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .wp-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.92rem;
+      }
+      .wp-badge {
+        background: var(--accent-garage);
+        color: #fff;
+        font-weight: 900;
+        font-size: 0.75rem;
+        padding: 0.2rem 0.45rem;
+        border-radius: 5px;
+      }
+      .wp-visit-site {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        padding: 0.2rem 0.55rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+      }
+      .wp-top-btn {
+        background: rgba(255, 107, 43, 0.16);
+        color: #ff9466;
+        border: 1px solid rgba(255, 107, 43, 0.35);
+        padding: 0.3rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .wp-status-indicator {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: #4ade80;
+      }
+      .wp-user-Chip {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+      .wp-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: calc(100vh - 52px);
+      }
+      .wp-sidebar {
+        background: #101520;
+        border-right: 1px solid var(--border-subtle);
+        padding: 1.25rem 0.75rem;
+      }
+      .wp-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+      .wp-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        width: 100%;
+        text-align: left;
+        padding: 0.65rem 0.85rem;
+        border-radius: 8px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .wp-nav-item:hover, .wp-nav-item.active {
+        background: var(--bg-card);
+        color: #fff;
+        border-color: var(--border-subtle);
+      }
+      .wp-nav-item.active {
+        border-left: 3px solid var(--accent-garage);
+      }
+      .wp-nav-divider {
+        height: 1px;
+        background: var(--border-subtle);
+        margin: 0.65rem 0;
+      }
+      .wp-main {
+        padding: 2rem;
+        max-width: 1380px;
+      }
+      .wp-view-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .wp-view-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+      }
+      .wp-view-header p {
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+      }
+      .wp-filter-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+      }
+      .wp-tab {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        padding: 0.45rem 0.9rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .wp-tab.active {
+        background: rgba(255, 107, 43, 0.15);
+        color: #fff;
+        border-color: var(--accent-garage);
+      }
+      .wp-table-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        overflow-x: auto;
+      }
+      .wp-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .wp-table th, .wp-table td {
+        padding: 1rem 1.15rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .wp-table th {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .wp-action-btn {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        padding: 0.35rem 0.65rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-left: 0.3rem;
+      }
+      .wp-action-btn.edit:hover {
+        border-color: var(--accent-garage);
+        color: var(--accent-garage);
+      }
+      .wp-action-btn.delete:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+      }
+      .wp-toast {
+        background: rgba(34, 197, 94, 0.16);
+        border: 1px solid #22c55e;
+        color: #fff;
+        padding: 0.9rem 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1.25rem;
+        font-weight: 600;
+      }
+      .wp-editor-grid {
+        display: grid;
+        grid-template-columns: 1fr 330px;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .wp-editor-main {
+        display: grid;
+        gap: 1.25rem;
+      }
+      .wp-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.25rem;
+      }
+      .wp-title-input {
+        width: 100%;
+        background: #0b0e15;
+        border: 1px solid var(--border-strong);
+        color: #fff;
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        font-weight: 700;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.65rem;
+      }
+      .wp-permalink-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+      .wp-slug-input {
+        background: #0b0e15;
+        border: 1px solid var(--border-strong);
+        color: var(--accent-gaming);
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        padding: 0.25rem 0.55rem;
+        border-radius: 5px;
+      }
+      .wp-link-small {
+        color: var(--accent-garage);
+        font-weight: 700;
+        margin-left: auto;
+      }
+      .wp-label {
+        display: block;
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.4rem;
+      }
+      .wp-textarea {
+        width: 100%;
+        background: #0b0e15;
+        border: 1px solid var(--border-strong);
+        color: #fff;
+        padding: 0.65rem 0.85rem;
+        border-radius: 8px;
+        font-family: var(--font-sans);
+        font-size: 0.92rem;
+      }
+      .wp-editor-box {
+        padding: 0;
+        overflow: hidden;
+      }
+      .wp-editor-top-bar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        background: #101520;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .wp-media-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .wp-media-upload-btn {
+        background: rgba(0, 229, 255, 0.14);
+        border: 1px solid rgba(0, 229, 255, 0.4);
+        color: var(--accent-gaming);
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .wp-insert-chip {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        padding: 0.35rem 0.65rem;
+        border-radius: 6px;
+        font-size: 0.76rem;
+        cursor: pointer;
+      }
+      .wp-insert-chip:hover {
+        border-color: var(--accent-garage);
+      }
+      .wp-mode-tabs {
+        display: flex;
+        gap: 0.25rem;
+      }
+      .wp-mode-tab {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .wp-mode-tab.active {
+        background: var(--accent-garage);
+        color: #fff;
+        border-color: var(--accent-garage);
+      }
+      .wp-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.6rem 1rem;
+        background: #141b29;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .wp-format-select {
+        background: #0b0e15;
+        border: 1px solid var(--border-strong);
+        color: #fff;
+        padding: 0.3rem 0.55rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+      }
+      .wp-tool-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-subtle);
+        color: #fff;
+        padding: 0.3rem 0.55rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+        cursor: pointer;
+      }
+      .wp-tool-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      .wp-sep {
+        width: 1px;
+        height: 20px;
+        background: var(--border-subtle);
+        margin: 0 0.2rem;
+      }
+      .wp-visual-surface {
+        min-height: 380px;
+        max-height: 620px;
+        overflow-y: auto;
+        padding: 1.5rem;
+        border: none;
+        border-radius: 0;
+        background: #0d111a;
+        outline: none;
+      }
+      .wp-code-surface {
+        width: 100%;
+        min-height: 380px;
+        padding: 1.25rem;
+        background: #090c12;
+        border: none;
+        color: #e2e8f0;
+        font-family: var(--font-mono);
+        font-size: 0.86rem;
+        line-height: 1.6;
+        outline: none;
+        resize: vertical;
+      }
+      .wp-editor-statusbar {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.55rem 1rem;
+        background: #101520;
+        border-top: 1px solid var(--border-subtle);
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        color: var(--text-secondary);
+      }
+
+      /* SEO BOX */
+      .wp-seo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1.2rem;
+      }
+      .wp-seo-header h3 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+      }
+      .wp-seo-header p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+      .seo-score-pill {
+        background: #0b0e15;
+        border: 2px solid #22c55e;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+      }
+      .serp-preview-wrap {
+        background: #0b0e15;
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .serp-preview-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+      }
+      .serp-dev-btn {
+        background: transparent;
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        padding: 0.25rem 0.6rem;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+      .serp-dev-btn.active {
+        background: rgba(0, 229, 255, 0.14);
+        color: var(--accent-gaming);
+        border-color: var(--accent-gaming);
+      }
+      .serp-card {
+        background: #ffffff;
+        color: #202124;
+        padding: 1rem 1.2rem;
+        border-radius: 8px;
+        max-width: 600px;
+        font-family: Arial, sans-serif;
+      }
+      .serp-card.mobile {
+        max-width: 360px;
+      }
+      .serp-site-row {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 0.35rem;
+      }
+      .serp-favicon {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #ff6b2b;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 800;
+      }
+      .serp-site-name {
+        font-size: 0.82rem;
+        color: #202124;
+      }
+      .serp-breadcrumb {
+        font-size: 0.74rem;
+        color: #4d5156;
+      }
+      .serp-title {
+        color: #1a0dab;
+        font-size: 1.15rem;
+        line-height: 1.3;
+        margin-bottom: 0.25rem;
+        cursor: pointer;
+      }
+      .serp-desc {
+        color: #4d5156;
+        font-size: 0.85rem;
+        line-height: 1.45;
+      }
+      .seo-fields-grid {
+        display: grid;
+        gap: 0.95rem;
+      }
+      .wp-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+      }
+      .wp-field input, .wp-field textarea, .wp-field select {
+        background: #0b0e15;
+        border: 1px solid var(--border-strong);
+        color: #fff;
+        padding: 0.6rem 0.8rem;
+        border-radius: 7px;
+        font-size: 0.9rem;
+      }
+      .wp-field-label-row {
+        display: flex;
+        justify-content: space-between;
+      }
+      .char-counter {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+      }
+      .seo-meter {
+        height: 5px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .seo-meter-fill {
+        height: 100%;
+        width: 0%;
+        background: #22c55e;
+        transition: width 0.2s ease;
+      }
+      .wp-field-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+      }
+      .seo-checklist {
+        margin-top: 1.2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .seo-checklist h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+      }
+      .seo-checklist ul {
+        list-style: none;
+        display: grid;
+        gap: 0.35rem;
+        font-size: 0.85rem;
+      }
+
+      /* RIGHT SIDEBAR METABOXES */
+      .wp-editor-sidebar {
+        display: grid;
+        gap: 1.15rem;
+      }
+      .wp-side-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .wp-side-box h4 {
+        padding: 0.8rem 1rem;
+        background: #101520;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: 0.92rem;
+      }
+      .wp-side-body {
+        padding: 1rem;
+        display: grid;
+        gap: 0.85rem;
+      }
+      .wp-chk-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+      .wp-publish-actions {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+      }
+      .wp-cat-radios {
+        display: grid;
+        gap: 0.55rem;
+      }
+      .wp-cat-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.55rem;
+        padding: 0.55rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid var(--border-subtle);
+        cursor: pointer;
+      }
+      .wp-cat-option strong {
+        display: block;
+        font-size: 0.86rem;
+      }
+      .wp-cat-option small {
+        font-size: 0.74rem;
+        color: var(--text-secondary);
+      }
+      .wp-tags-input {
+        width: 100%;
+        background: #0b0e15;
+        border: 1px solid var(--border-strong);
+        color: #fff;
+        padding: 0.55rem 0.75rem;
+        border-radius: 7px;
+        font-size: 0.86rem;
+      }
+      .wp-quick-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+      .quick-tag-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        padding: 0.2rem 0.45rem;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        cursor: pointer;
+      }
+
+      @media (max-width: 1024px) {
+        .wp-layout {
+          grid-template-columns: 1fr;
+        }
+        .wp-sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--border-subtle);
+        }
+        .wp-nav {
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+        .wp-nav-item {
+          width: auto;
+        }
+        .wp-editor-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </body>
+</html>

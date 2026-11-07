@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PowerCalculator from '../components/PowerCalculator.astro';
+import MechanicQuiz from '../components/MechanicQuiz.astro';
+---
+
+<BaseLayout title="Kalkulator Warsztatowy & Quizy" activeNav="warsztat">
+  <section class="container" style="padding: 3rem 1.25rem; max-width: 920px;">
+    <h1 class="section-title" style="font-size: 2.1rem; margin-bottom: 0.5rem;">
+      ⚙️ Interaktywne Narzędzia Warsztatowe & Quizy
+    </h1>
+    <p class="section-subtitle" style="margin-bottom: 2rem;">
+      Narzędzia, które stworzyłem na blogu i które mogę wklejać jednym znacznikiem do każdego nowego artykułu.
+    </p>
+
+    <PowerCalculator defaultTorque={380} defaultRpm={4400} defaultWeight={1450} />
+
+    <MechanicQuiz
+      title="Trening przed egzaminem zawodowym (Mechanik Pojazdów Samochodowych)"
+      questions={[
+        {
+          question: "Jaki jest prawidłowy porządek zapłonu w większości rzędowych silników 4-cylindrowych (R4)?",
+          options: [
+            "1 - 2 - 3 - 4",
+            "1 - 3 - 4 - 2",
+            "1 - 4 - 2 - 3"
+          ],
+          correctIndex: 1,
+          explanation: "W klasycznym silniku R4 wykorbienia wału korbowego są ułożone tak, że tłoki 1 i 4 oraz 2 i 3 poruszają się parami, a najczęstsza kolejność zapłonu to 1-3-4-2."
+        },
+        {
+          question: "Co się dzieje z temperaturą wrzenia płynu hamulcowego DOT-4, gdy chłonie on wilgoć z otoczenia (jest higroskopijny)?",
+          options: [
+            "Temperatura wrzenia spada, co grozi tzw. korkiem parowym i wpadnięciem pedału hamulca przy mocnym hamowaniu",
+            "Temperatura wrzenia rośnie i hamulce działają mocniej",
+            "Płyn zmienia się w olej silnikowy"
+          ],
+          correctIndex: 0,
+          explanation: "Woda w układzie hamulcowym obniża temperaturę wrzenia płynu – przy ostrym hamowaniu woda paruje, a para jest ściśliwa!"
+        },
+        {
+          question: "Który czujnik odpowiada za informację o położeniu wału korbowego, bez której większość silników w ogóle nie odpali?",
+          options: [
+            "Czujnik temperatury powietrza zewnętrznego",
+            "Czujnik położenia wału korbowego (CKP)",
+            "Czujnik poziomu płynu spryskiwaczy"
+          ],
+          correctIndex: 1,
+          explanation: "Bez sygnału z czujnika CKP sterownik silnika (ECU) nie wie, kiedy podać iskrę i wtrysk paliwa."
+        }
+      ]}
+    />
+  </section>
+</BaseLayout>

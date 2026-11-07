@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllPosts, type BlogPost } from '../../utils/posts';
+
+export function getStaticPaths() {
+  const posts = getAllPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+const { Content, frontmatter } = post;
+
+const categoryLabels: Record<string, string> = {
+  'moje-prace': '📚 Moje Prace • ZST Lipno',
+  motoryzacja: '🔧 Garaż & Mechanika',
+  warsztat: '🛠️ ZST Lipno • Warsztat',
+  hobby: '🎮 Po Godzinach',
+};
+---
+
+<BaseLayout
+  title={frontmatter.title}
+  description={frontmatter.description}
+  seoTitle={frontmatter.seoTitle}
+  seoDescription={frontmatter.seoDescription}
+  focusKeyword={frontmatter.focusKeyword}
+  canonicalUrl={frontmatter.canonicalUrl}
+  ogImage={frontmatter.ogImage}
+  robots={frontmatter.robots}
+  activeNav={frontmatter.category === 'moje-prace' ? 'moje-prace' : 'motoryzacja'}
+>
+  <div class="container article-wrapper">
+    <div class="no-print" style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+      <a href="/" class="btn btn-outline" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
+        ← Wróć do strony głównej
+      </a>
+      <a href={`/admin?edit=${post.slug}`} class="btn btn-outline" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">
+        ✏️ Edytuj ten wpis w Panelu Admina
+      </a>
+    </div>
+
+    <header class="article-header">
+      <span class={`category-badge ${frontmatter.category}`}>
+        {categoryLabels[frontmatter.category] ?? frontmatter.category}
+      </span>
+      <h1 class="article-title">{frontmatter.title}</h1>
+      <p class="article-description">{frontmatter.description}</p>
+
+      <div class="article-meta-bar">
+        <span>👤 Autor: <strong>Igor Wielgus</strong> (Szkoła Branżowa ZST Lipno)</span>
+        <span>📅 Data: {frontmatter.date}</span>
+        <span>⏱️ Czas czytania: {frontmatter.readingTime}</span>
+      </div>
+    </header>
+
+    <article class="prose">
+      <Content />
+    </article>
+
+    <div class="article-tags-footer no-print">
+      <div class="tag-list">
+        {frontmatter.tags.map((tag) => (
+          <span class="tag">#{tag}</span>
+        ))}
+      </div>
+      <a href="/kategoria/moje-prace" style="font-size: 0.88rem; color: var(--accent-gaming); font-weight: 700;">
+        📚 Zobacz wszystkie prace w kategorii „Moje Prace” →
+      </a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .article-tags-footer {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+</style>

@@ -1,0 +1,259 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { getAllPosts } from '../utils/posts';
+
+const allPosts = getAllPosts();
+const myWorksPosts = allPosts.filter((p) => p.frontmatter.category === 'moje-prace');
+const garagePosts = allPosts.filter(
+  (p) => p.frontmatter.category === 'motoryzacja' || p.frontmatter.category === 'warsztat'
+);
+---
+
+<BaseLayout title="Strona Główna – Mechanika Samochodowa & Moje Prace" activeNav="home">
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-main">
+        <div>
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            ZST w Lipnie • Szkoła Branżowa – Mechanik Pojazdów Samochodowych (Rok 2)
+          </div>
+          <h1 class="hero-title">
+            Cześć, tu <span class="gradient-garage">Igor Wielgus</span>.<br />
+            Warsztat, <span class="gradient-garage">mechanika</span> i <span class="gradient-gaming">moje prace</span>.
+          </h1>
+          <p class="hero-lead">
+            Blog, na którym łączę naukę zawodu mechanika pojazdów samochodowych w ZST w Lipnie z multimedialnymi opracowaniami, schematami technicznymi i praktyczną wiedzą z warsztatu.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <a href="/kategoria/moje-prace" class="btn btn-garage">
+            📚 Moje Prace (Skrzynie biegów + QR)
+          </a>
+          <a href="/kategoria/motoryzacja" class="btn btn-outline">
+            🔧 Garaż & Warsztat
+          </a>
+          <a href="/narzedzia" class="btn btn-gaming">
+            ⚙️ Kalkulator Mocy & Quizy
+          </a>
+        </div>
+      </div>
+
+      <!-- TELEMETRY CARD -->
+      <aside class="telemetry-card" aria-label="Status i statystyki bloga">
+        <div class="telemetry-header">
+          <span class="telemetry-title">PROFIL // IGOR WIELGUS</span>
+          <div class="rpm-bars" aria-hidden="true">
+            <span class="rpm-bar g"></span>
+            <span class="rpm-bar g"></span>
+            <span class="rpm-bar g"></span>
+            <span class="rpm-bar y"></span>
+            <span class="rpm-bar y"></span>
+            <span class="rpm-bar r"></span>
+          </div>
+        </div>
+
+        <div class="stat-list">
+          <div class="stat-item">
+            <span class="stat-label">Szkoła</span>
+            <span class="stat-value orange">ZST w Lipnie • Szkoła Branżowa</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Kierunek (2. rok)</span>
+            <span class="stat-value">Mechanik Pojazdów Samochodowych</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Moje Prace (ZST)</span>
+            <span class="stat-value cyan">{myWorksPosts.length} opracowanie (z kodem QR)</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Wszystkie publikacje</span>
+            <span class="stat-value">{allPosts.length} artykuły</span>
+          </div>
+        </div>
+
+        <div style="font-size: 0.82rem; color: var(--text-secondary); border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
+          💡 <strong>Nauka przez tworzenie:</strong> Każda praca pisemna ma tutaj swój interaktywny odpowiednik z filmami i schematami dostępny po zeskanowaniu kodu QR.
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- FEATURED SECTION: MOJE PRACE -->
+  <section class="container" style="margin-top: 1rem;">
+    <div class="section-header">
+      <div>
+        <span class="category-badge moje-prace" style="margin-bottom: 0.45rem;">📚 Kategoria główna</span>
+        <h2 class="section-title">Moje Prace – Wypracowania i Projekty Szkolne</h2>
+        <p class="section-subtitle">Multimedialne wersje wypracowań z kodami QR do zeszytu, filmami z pracy podzespołów i schematami budowy</p>
+      </div>
+      <a href="/kategoria/moje-prace" class="btn btn-outline">Zobacz wszystkie prace →</a>
+    </div>
+
+    <div class="posts-grid">
+      {myWorksPosts.map((post) => (
+        <PostCard post={post} />
+      ))}
+    </div>
+  </section>
+
+  <!-- LIVE FILTER & ALL POSTS -->
+  <section class="container" style="margin-top: 1rem;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Wszystkie wpisy na blogu</h2>
+        <p class="section-subtitle">Wyszukaj temat (np. skrzynie biegów, turbo, OBD2)</p>
+      </div>
+
+      <div class="filter-bar">
+        <input
+          type="search"
+          id="post-search"
+          placeholder="Szukaj artykułu lub tagu..."
+          class="search-input"
+        />
+      </div>
+    </div>
+
+    <div class="posts-grid" id="all-posts-grid">
+      {allPosts.map((post) => (
+        <div class="post-item-wrap" data-title={post.frontmatter.title.toLowerCase()} data-tags={post.frontmatter.tags.join(' ').toLowerCase()}>
+          <PostCard post={post} />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- DUAL ZONES: MOJE PRACE VS GARAŻ -->
+  <section class="container zones-section">
+    <div class="zones-grid">
+      <div class="zone-box works-zone">
+        <div class="zone-top">
+          <span class="category-badge moje-prace">📚 Strefa 01</span>
+          <h3>Moje Prace (Szkoła Branżowa ZST Lipno)</h3>
+          <p>Opracowania tematów z budowy pojazdów wzbogacone o materiały wideo, przekroje techniczne i kody QR wklejane do zeszytu.</p>
+        </div>
+        <div class="zone-links">
+          {myWorksPosts.map((p) => (
+            <a href={`/blog/${p.slug}`} class="zone-post-link">
+              <span>{p.frontmatter.title}</span>
+              <span class="arrow">→</span>
+            </a>
+          ))}
+        </div>
+        <a href="/kategoria/moje-prace" class="btn btn-gaming" style="width: fit-content; margin-top: 1rem;">
+          Otwórz kategorię Moje Prace ({myWorksPosts.length})
+        </a>
+      </div>
+
+      <div class="zone-box garage-zone">
+        <div class="zone-top">
+          <span class="category-badge motoryzacja">🔧 Strefa 02</span>
+          <h3>Garaż, Silniki & Praktyka Warsztatowa</h3>
+          <p>Artykuły o działaniu turbosprężarek, zależności momentu obrotowego od mocy oraz diagnostyce komputerowej OBD2.</p>
+        </div>
+        <div class="zone-links">
+          {garagePosts.map((p) => (
+            <a href={`/blog/${p.slug}`} class="zone-post-link">
+              <span>{p.frontmatter.title}</span>
+              <span class="arrow">→</span>
+            </a>
+          ))}
+        </div>
+        <a href="/kategoria/motoryzacja" class="btn btn-garage" style="width: fit-content; margin-top: 1rem;">
+          Zobacz wpisy z Garażu ({garagePosts.length})
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const searchInput = document.getElementById('post-search') as HTMLInputElement | null;
+  const items = document.querySelectorAll('.post-item-wrap');
+
+  searchInput?.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    items.forEach((el) => {
+      const title = el.getAttribute('data-title') || '';
+      const tags = el.getAttribute('data-tags') || '';
+      const match = !query || title.includes(query) || tags.includes(query);
+      (el as HTMLElement).style.display = match ? '' : 'none';
+    });
+  });
+</script>
+
+<style>
+  .search-input {
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    min-width: 260px;
+    outline: none;
+  }
+  .search-input:focus {
+    border-color: var(--accent-garage);
+    box-shadow: 0 0 0 3px var(--accent-garage-glow);
+  }
+  .zones-section {
+    margin-bottom: 4rem;
+  }
+  .zones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.75rem;
+  }
+  .zone-box {
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid var(--border-subtle);
+  }
+  .works-zone {
+    background: linear-gradient(155deg, rgba(0, 229, 255, 0.08), rgba(21, 27, 39, 0.92));
+    border-color: rgba(0, 229, 255, 0.35);
+  }
+  .garage-zone {
+    background: linear-gradient(155deg, rgba(255, 107, 43, 0.08), rgba(21, 27, 39, 0.92));
+    border-color: rgba(255, 107, 43, 0.3);
+  }
+  .zone-top h3 {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    margin: 0.75rem 0 0.5rem;
+  }
+  .zone-top p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+  }
+  .zone-links {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .zone-post-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.95rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .zone-post-link:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateX(3px);
+  }
+</style>

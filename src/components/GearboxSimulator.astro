@@ -1,0 +1,242 @@
+---
+---
+
+<div class="gearbox-sim" data-gearbox-sim>
+  <div class="sim-header">
+    <span class="sim-pill">⚙️ Interaktywny Symulator Przełożeń</span>
+    <h4>Sprawdź jak zmiana biegu zmienia moment na kołach i prędkość auta</h4>
+    <p>Wybierz bieg (od 1 do 6) i zmień obroty silnika (RPM), aby zobaczyć jak działa dźwignia mechaniczna w skrzyni biegów.</p>
+  </div>
+
+  <div class="gear-selector" role="group" aria-label="Wybór biegu">
+    <button type="button" class="gear-btn active" data-gear="1" data-ratio="3.62">
+      <span class="g-num">1. bieg</span>
+      <span class="g-ratio">3.62 : 1</span>
+      <span class="g-desc">Ruszanie / Siła</span>
+    </button>
+    <button type="button" class="gear-btn" data-gear="2" data-ratio="2.19">
+      <span class="g-num">2. bieg</span>
+      <span class="g-ratio">2.19 : 1</span>
+      <span class="g-desc">Przyspieszanie</span>
+    </button>
+    <button type="button" class="gear-btn" data-gear="3" data-ratio="1.41">
+      <span class="g-num">3. bieg</span>
+      <span class="g-ratio">1.41 : 1</span>
+      <span class="g-desc">Elastyczność</span>
+    </button>
+    <button type="button" class="gear-btn" data-gear="4" data-ratio="1.00">
+      <span class="g-num">4. bieg</span>
+      <span class="g-ratio">1.00 : 1</span>
+      <span class="g-desc">Bezpośredni</span>
+    </button>
+    <button type="button" class="gear-btn" data-gear="5" data-ratio="0.83">
+      <span class="g-num">5. bieg</span>
+      <span class="g-ratio">0.83 : 1</span>
+      <span class="g-desc">Nadbieg</span>
+    </button>
+    <button type="button" class="gear-btn" data-gear="6" data-ratio="0.68">
+      <span class="g-num">6. bieg</span>
+      <span class="g-ratio">0.68 : 1</span>
+      <span class="g-desc">Autostrada (Eko)</span>
+    </button>
+  </div>
+
+  <div class="sim-controls">
+    <label class="rpm-slider-wrap">
+      <div class="rpm-label-row">
+        <span>Obroty silnika (RPM): <strong data-sim-rpm-val>3000</strong> obr./min</span>
+        <span>Moment silnika: <strong>250 Nm</strong> | Przełożenie główne: <strong>3.90 : 1</strong></span>
+      </div>
+      <input type="range" min="1000" max="6500" step="100" value="3000" data-sim-rpm />
+    </label>
+  </div>
+
+  <div class="sim-telemetry-grid">
+    <div class="sim-stat">
+      <span class="s-label">Wybrane przełożenie</span>
+      <span class="s-val" data-sim-ratio>3.62 : 1</span>
+    </div>
+    <div class="sim-stat highlight-orange">
+      <span class="s-label">Moment obrotowy na kołach</span>
+      <span class="s-val" data-sim-wheel-torque>3530 Nm</span>
+    </div>
+    <div class="sim-stat highlight-cyan">
+      <span class="s-label">Prędkość samochodu</span>
+      <span class="s-val" data-sim-speed>25 km/h</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-gearbox-sim]').forEach((sim) => {
+    const gearBtns = sim.querySelectorAll('.gear-btn');
+    const rpmInput = sim.querySelector('[data-sim-rpm]') as HTMLInputElement;
+    const rpmVal = sim.querySelector('[data-sim-rpm-val]');
+    const ratioOut = sim.querySelector('[data-sim-ratio]');
+    const torqueOut = sim.querySelector('[data-sim-wheel-torque]');
+    const speedOut = sim.querySelector('[data-sim-speed]');
+
+    let currentRatio = 3.62;
+    const finalDrive = 3.90;
+    const engineTorque = 250; // Nm
+    const wheelCircumference = 1.98; // meters (205/55 R16)
+
+    function updateSim() {
+      const rpm = Number(rpmInput.value);
+      if (rpmVal) rpmVal.textContent = String(rpm);
+      if (ratioOut) ratioOut.textContent = `${currentRatio.toFixed(2)} : 1`;
+
+      const totalRatio = currentRatio * finalDrive;
+      const wheelTorque = Math.round(engineTorque * totalRatio * 0.92); // 92% mechanical efficiency
+      const wheelRpm = rpm / totalRatio;
+      const speedKmh = Math.round((wheelRpm * wheelCircumference * 60) / 1000);
+
+      if (torqueOut) torqueOut.textContent = `${wheelTorque} Nm`;
+      if (speedOut) speedOut.textContent = `${speedKmh} km/h`;
+    }
+
+    gearBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        gearBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentRatio = Number(btn.getAttribute('data-ratio'));
+        updateSim();
+      });
+    });
+
+    rpmInput?.addEventListener('input', updateSim);
+    updateSim();
+  });
+</script>
+
+<style>
+  .gearbox-sim {
+    background: linear-gradient(155deg, #151c2b, #0e131e);
+    border: 1px solid rgba(255, 107, 43, 0.4);
+    border-radius: 16px;
+    padding: 1.6rem;
+    margin: 2rem 0;
+  }
+  .sim-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #ff9466;
+    background: rgba(255, 107, 43, 0.14);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    margin-bottom: 0.45rem;
+  }
+  .sim-header h4 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: #fff;
+    margin: 0 0 0.35rem;
+  }
+  .sim-header p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.15rem;
+  }
+  .gear-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.55rem;
+    margin-bottom: 1.2rem;
+  }
+  .gear-btn {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.65rem 0.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    transition: all 0.18s ease;
+  }
+  .gear-btn:hover {
+    border-color: var(--accent-garage);
+  }
+  .gear-btn.active {
+    background: rgba(255, 107, 43, 0.16);
+    border-color: var(--accent-garage);
+    box-shadow: 0 0 14px rgba(255, 107, 43, 0.25);
+  }
+  .g-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+  .g-ratio {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--accent-garage);
+  }
+  .g-desc {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+  }
+  .sim-controls {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.1rem;
+  }
+  .rpm-label-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+  }
+  .rpm-slider-wrap input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent-garage);
+    cursor: pointer;
+  }
+  .sim-telemetry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.85rem;
+  }
+  .sim-stat {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    text-align: center;
+  }
+  .sim-stat.highlight-orange {
+    border-color: rgba(255, 107, 43, 0.45);
+    background: rgba(255, 107, 43, 0.09);
+  }
+  .sim-stat.highlight-cyan {
+    border-color: rgba(0, 229, 255, 0.45);
+    background: rgba(0, 229, 255, 0.09);
+  }
+  .s-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
+  }
+  .s-val {
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #fff;
+  }
+  .sim-stat.highlight-orange .s-val {
+    color: var(--accent-garage);
+  }
+  .sim-stat.highlight-cyan .s-val {
+    color: var(--accent-gaming);
+  }
+</style>

@@ -1,0 +1,189 @@
+---
+interface ScoreMetric {
+  label: string;
+  score: number; // 1 - 10
+}
+
+interface Props {
+  gameTitle: string;
+  platform: string;
+  genre: string;
+  overallScore: number;
+  metrics: ScoreMetric[];
+  pros: string[];
+  cons: string[];
+  verdict: string;
+}
+
+const {
+  gameTitle,
+  platform,
+  genre,
+  overallScore,
+  metrics = [],
+  pros = [],
+  cons = [],
+  verdict,
+} = Astro.props;
+---
+
+<div class="game-card">
+  <div class="game-card-top">
+    <div>
+      <span class="game-pill">🎮 Karta Oceny Gry • {platform} • {genre}</span>
+      <h4>{gameTitle}</h4>
+    </div>
+    <div class="overall-badge">
+      <span class="score-num">{overallScore}</span>
+      <span class="score-max">/10</span>
+    </div>
+  </div>
+
+  <div class="metrics-list">
+    {metrics.map((m) => (
+      <div class="metric-row">
+        <div class="metric-labels">
+          <span>{m.label}</span>
+          <span class="metric-val">{m.score}/10</span>
+        </div>
+        <div class="metric-bar-bg">
+          <div class="metric-bar-fill" style={`width: ${m.score * 10}%`}></div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <div class="pros-cons-grid">
+    <div class="pros-box">
+      <h5>➕ Co siadło (Plusy)</h5>
+      <ul>
+        {pros.map((p) => <li>{p}</li>)}
+      </ul>
+    </div>
+    <div class="cons-box">
+      <h5>➖ Co denerwuje (Minusy)</h5>
+      <ul>
+        {cons.map((c) => <li>{c}</li>)}
+      </ul>
+    </div>
+  </div>
+
+  <div class="verdict-box">
+    <strong>Werdykt Igora:</strong> {verdict}
+  </div>
+</div>
+
+<style>
+  .game-card {
+    background: linear-gradient(155deg, #161b2c, #0f131f);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 16px;
+    padding: 1.6rem;
+    margin: 2rem 0;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+  .game-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 1.2rem;
+  }
+  .game-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent-gaming);
+    background: rgba(0, 229, 255, 0.12);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    margin-bottom: 0.4rem;
+  }
+  .game-card-top h4 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: #fff;
+    margin: 0;
+  }
+  .overall-badge {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(168, 85, 247, 0.25));
+    border: 1px solid var(--accent-gaming);
+    border-radius: 14px;
+    padding: 0.6rem 1rem;
+    text-align: center;
+    min-width: 82px;
+  }
+  .score-num {
+    font-family: var(--font-mono);
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: #fff;
+  }
+  .score-max {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+  .metrics-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1.35rem;
+  }
+  .metric-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.86rem;
+    margin-bottom: 0.3rem;
+  }
+  .metric-val {
+    font-family: var(--font-mono);
+    color: var(--accent-gaming);
+    font-weight: 700;
+  }
+  .metric-bar-bg {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .metric-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-gaming), var(--accent-purple));
+    border-radius: 999px;
+  }
+  .pros-cons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .pros-box, .cons-box {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+  }
+  .pros-box h5 {
+    color: #4ade80;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  .cons-box h5 {
+    color: #f87171;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  .pros-box ul, .cons-box ul {
+    margin: 0 0 0 1.1rem !important;
+    font-size: 0.88rem;
+  }
+  .verdict-box {
+    background: rgba(0, 229, 255, 0.07);
+    border-left: 3px solid var(--accent-gaming);
+    padding: 0.85rem 1rem;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.94rem;
+  }
+</style>

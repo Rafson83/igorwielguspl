@@ -1,0 +1,237 @@
+---
+title: "Ewolucja, budowa i zasada działania samochodowych skrzyń biegów – Multimedialne Wypracowanie"
+description: "Kompletne opracowanie budowy skrzyń manualnych (MT), dwusprzęgłowych (DCT/DSG), planetarnych automatów (AT) oraz bezstopniowych (CVT) z wideo pracy przekładni, schematami technicznymi i kodem QR do zeszytu."
+date: "2026-11-07"
+category: "moje-prace"
+tags: ["skrzynie-biegow", "wypracowanie", "MT", "DCT", "AT", "CVT", "ZST-Lipno"]
+readingTime: "8 min"
+featured: true
+seoTitle: "Budowa i działanie skrzyń biegów (MT, DCT, AT, CVT) – Wypracowanie | Igor Wielgus"
+seoDescription: "Multimedialne wypracowanie z budowy i historii samochodowych skrzyń biegów (MT, DSG/DCT, planetarnych AT i bezstopniowych CVT) ze schematami i wideo."
+focusKeyword: "skrzynie biegów budowa"
+ogImage: "/media/skrzynie-biegow/schemat-mt.jpg"
+---
+
+import QrCodeNotebookCard from '../../components/QrCodeNotebookCard.astro';
+import GearboxSimulator from '../../components/GearboxSimulator.astro';
+import MechanicQuiz from '../../components/MechanicQuiz.astro';
+import WorkshopTip from '../../components/WorkshopTip.astro';
+
+Skrzynia biegów jest fundamentem każdego pojazdu spalinowego, pełniąc rolę kluczowego pośrednika między silnikiem a kołami. Konieczność jej stosowania wynika z fizycznych ograniczeń silnika spalinowego, który generuje użyteczną moc i moment obrotowy jedynie w wąskim zakresie prędkości obrotowych. Aby samochód mógł płynnie ruszyć z miejsca, a następnie osiągać prędkości autostradowe, siła napędowa musi być modyfikowana i odpowiednio zwielokrotniana. Ewolucja skrzyń biegów – od prymitywnych przekładni po zaawansowane układy bezstopniowe i mechatroniczne – stanowi odzwierciedlenie dążenia inżynierów do maksymalizacji wydajności, komfortu oraz redukcji emisji spalin. Wraz z nadejściem ery elektromobilności element ten przechodzi obecnie swoją największą redefinicję w historii.
+
+<figure class="media-card video-showcase">
+  <div class="media-badge-bar">
+    <span class="media-pill">🎬 Materiał Wideo • Praca i zazębienie przekładni</span>
+    <span class="media-sub">Animacja 3D mechanizmu skrzyni biegów</span>
+  </div>
+  <video
+    controls
+    autoplay
+    loop
+    muted
+    playsinline
+    class="transmission-video"
+    poster="/media/skrzynie-biegow/schemat-mt.jpg"
+  >
+    <source src="/media/skrzynie-biegow/praca-skrzyni-biegow.mp4" type="video/mp4" />
+    Twoja przeglądarka nie obsługuje odtwarzacza wideo HTML5.
+  </video>
+  <figcaption>
+    Wizualizacja pracy skrzyni biegów – współpraca wałków, kół zębatych oraz przeniesienia momentu obrotowego.
+  </figcaption>
+</figure>
+
+## 1. Rys historyczny i kamienie milowe
+
+Rozwój przekładni napędowych jest równie stary jak sama motoryzacja. Za pierwszą klasyczną manualną skrzynię biegów uznaje się konstrukcję Francuzów, **Louisa Panharda i Émile'a Levassora**, którzy w **1894 roku** zaprezentowali trzystopniowy mechanizm oparty na przesuwnych kołach zębatych. Kierowca musiał wówczas wykazywać się niezwykłym wyczuciem, zrównując obroty silnika z prędkością kół, aby uniknąć głośnych zgrzytów podczas zmiany przełożeń.
+
+Przełomem dla komfortu prowadzenia był rok **1928**, kiedy marka **Cadillac** wprowadziła w pełni zsynchronizowaną skrzynię biegów. Wyeliminowało to uciążliwą technikę podwójnego wysprzęglania i międzygazu. Zaledwie dekadę później, w **1939 roku**, **General Motors** zrewolucjonizowało rynek, wypuszczając przekładnię **Hydra-Matic** – pierwszy masowo produkowany „automat” wykorzystujący sprzęgło hydrauliczne (które z czasem wyewoluowało w konwerter momentu).
+
+W **1958 roku** holenderski **DAF** zaprezentował system **Variomatic**. Była to pierwsza komercyjna przekładnia bezstopniowa (**CVT**), w której zamiast tradycyjnych zębatek zastosowano paski i koła stożkowe. Ostatnią wielką rewolucją w autach spalinowych był rok **2003**, gdy **Volkswagen** spopularyzował skrzynię dwusprzęgłową **DSG** w sportowym modelu Golf R32, udowadniając, że automat może zmieniać biegi szybciej niż jakikolwiek kierowca rajdowy, bez odcinania dopływu mocy na koła.
+
+<div class="timeline-grid">
+  <div class="tl-card">
+    <span class="tl-year">1894</span>
+    <strong>Panhard & Levassor</strong>
+    <p>Pierwsza 3-biegowa skrzynia z przesuwnymi kołami zębatymi.</p>
+  </div>
+  <div class="tl-card">
+    <span class="tl-year">1928</span>
+    <strong>Cadillac SynchroMesh</strong>
+    <p>Pierwsza zsynchronizowana skrzynia manualna – koniec zgrzytania biegów.</p>
+  </div>
+  <div class="tl-card">
+    <span class="tl-year">1939</span>
+    <strong>GM Hydra-Matic</strong>
+    <p>Pierwszy seryjny automat ze sprzęgłem hydraulicznym i przekładnią planetarną.</p>
+  </div>
+  <div class="tl-card">
+    <span class="tl-year">1958</span>
+    <strong>DAF Variomatic</strong>
+    <p>Pierwsza bezstopniowa przekładnia CVT oparta na kołach stożkowych i pasach.</p>
+  </div>
+  <div class="tl-card">
+    <span class="tl-year">2003</span>
+    <strong>VW Golf R32 (DSG)</strong>
+    <p>Popularyzacja skrzyń dwusprzęgłowych DCT zmieniających biegi w ułamku sekundy.</p>
+  </div>
+</div>
+
+## 2. Architektura i fizyczna zasada działania
+
+Działanie skrzyni biegów opiera się na prostej mechanice i wykorzystaniu zjawiska dźwigni. Manipulując przełożeniem – czyli stosunkiem liczby zębów współpracujących ze sobą kół zębatych – system decyduje, czy na koła trafia ogromna siła (potrzebna do wprawienia ciężkiego auta w ruch z miejsca), czy wysoka prędkość obrotowa.
+
+* **Niskie biegi (np. pierwszy i drugi)** charakteryzują się wysokim przełożeniem. Silnik obraca się szybko, a koła stosunkowo wolno, co generuje wysoki moment obrotowy na osi napędowej.
+* **Wysokie biegi (nadbiegi)** pozwalają obniżyć obroty silnika przy wysokich prędkościach podróżnych (przełożenie zazwyczaj poniżej 1:1), co drastycznie redukuje hałas w kabinie i zużycie paliwa.
+
+Przetestuj tę zależność na żywo w poniższym symulatorze przełożeń:
+
+<GearboxSimulator />
+
+Pod względem mechanicznym wyróżnia się trzy główne typy konstrukcyjne:
+
+### Skrzynie o osiach stałych (wałkowe) – MT oraz DCT/DSG
+
+Stanowią fundament dla przekładni manualnych (**MT**), zautomatyzowanych (**AMT**) i dwusprzęgłowych (**DCT**). Konstrukcja opiera się na równoległych wałkach, na których osadzone są koła zębate. Osie obrotu tych wałków są nieruchome względem obudowy. Gdy napęd z silnika trafia na wałek wejściowy, załączenie biegu (poprzez sprzęgnięcie ze sobą wybranej pary zębatek) przekazuje moc na wałek główny. W systemach tych wyróżniamy również wałki pośrednie, a w przypadku klasycznego układu napędowego (silnik z przodu wzdłużnie, napęd na tył) występuje tzw. bieg bezpośredni łączący wałki 1:1, co całkowicie eliminuje straty mechaniczne na przekładniach zębatych.
+
+<figure class="blueprint-figure">
+  <img
+    src="/media/skrzynie-biegow/schemat-mt.jpg"
+    alt="Schemat budowy manualnej skrzyni biegów MT (Manual Transmission) – wałek sprzęgłowy, wałek pośredni, wałek główny, synchronizatory i widełki"
+    loading="lazy"
+  />
+  <figcaption>
+    <strong>Rys. 1. Skrzynia biegów MT (Manual Transmission) – Schemat budowy:</strong> widoczny wałek sprzęgłowy, wałek pośredni, wałek główny, koła zębate, synchronizatory oraz mechanizm wybieraka z widełkami.
+  </figcaption>
+</figure>
+
+Rozwinięciem koncepcji wałkowej jest **dwusprzęgłowa skrzynia biegów DCT (Dual-Clutch Transmission)**, w której zastosowano podwójne sprzęgło (mokre lub suche), współosiowe wałki wejściowe (jeden dla biegów nieparzystych, drugi dla parzystych) oraz moduł mechatroniki z siłownikami przełączającymi:
+
+<figure class="blueprint-figure">
+  <img
+    src="/media/skrzynie-biegow/schemat-dct.jpg"
+    alt="Schemat budowy dwusprzęgłowej skrzyni biegów DCT (Dual-Clutch Transmission) – podwójne sprzęgło, współosiowe wałki wejściowe i moduł mechatroniki"
+    loading="lazy"
+  />
+  <figcaption>
+    <strong>Rys. 2. Dwusprzęgłowa skrzynia biegów DCT (Dual-Clutch Transmission) – Schemat budowy:</strong> podwójny kosz sprzęgłowy, współosiowe wałki wejściowe oraz dolny moduł mechatroniki sterujący siłownikami.
+  </figcaption>
+</figure>
+
+### Skrzynie obiegowe (planetarne) – klasyczny automat AT
+
+To mechaniczne serce tradycyjnych, wysoce komfortowych automatów (**AT**). W odróżnieniu od skrzyń wałkowych koła zębate nie przesuwają się tu wzdłuż osi, ale wchodzą w skład zestawu zblokowanych ze sobą w jednym punkcie elementów. Centralne koło (**słoneczne**) jest otoczone małymi **satelitami** osadzonymi na **jarzmie**, a całość zamyka zewnętrzne **koło koronowe** z uzębieniem wewnętrznym. Skrzynia zmienia przełożenia poprzez automatyczne hamowanie (hamulcami taśmowymi lub sprzęgłami wielopłytkowymi) i łączenie poszczególnych kół, kierując moc napędu innymi ścieżkami zestawu planetarnego, a rolę sprzęgła pełni **przetwornik momentu obrotowego** (konwerter hydrokinetyczny).
+
+<figure class="blueprint-figure">
+  <img
+    src="/media/skrzynie-biegow/schemat-at.jpg"
+    alt="Schemat budowy automatycznej skrzyni biegów AT/ATM (Automatic Transmission) – przetwornik momentu obrotowego, zestawy przekładni planetarnych, sprzęgła wielopłytkowe i zespół zaworów"
+    loading="lazy"
+  />
+  <figcaption>
+    <strong>Rys. 3. Automatyczna skrzynia biegów AT/ATM (Automatic Transmission) – Schemat budowy:</strong> przetwornik momentu obrotowego (konwerter), pompa oleju, zestawy przekładni planetarnych, sprzęgła wielopłytkowe oraz zespół zaworów (sterownik hydrauliczny).
+  </figcaption>
+</figure>
+
+### Skrzynie bezstopniowe z wariatorem (CVT)
+
+Jest to konstrukcja całkowicie pozbawiona zdefiniowanych zębatek. Płynna zmiana przełożeń odbywa się za pomocą stalowego pasa (lub łańcucha) spiętego na dwóch parach kół stożkowych (wariatorach). Elektronika płynnie modyfikuje dystans między połówkami kół stożkowych, co zmienia promień roboczy pasa obiegowego. Pozwala to silnikowi stale utrzymywać obroty w idealnym oknie wydajności i eliminuje jakiekolwiek momenty szarpania przy przyspieszaniu.
+
+<figure class="blueprint-figure cvt-blueprint">
+  <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schemat techniczny przekładni bezstopniowej CVT">
+    <rect width="800" height="320" fill="#133361" />
+    <rect x="14" y="14" width="772" height="292" fill="none" stroke="#8ab4f8" stroke-width="1.5" />
+    <g stroke="rgba(138, 180, 248, 0.14)" stroke-width="1">
+      <line x1="0" y1="80" x2="800" y2="80" />
+      <line x1="0" y1="160" x2="800" y2="160" />
+      <line x1="0" y1="240" x2="800" y2="240" />
+      <line x1="200" y1="0" x2="200" y2="320" />
+      <line x1="400" y1="0" x2="400" y2="320" />
+      <line x1="600" y1="0" x2="600" y2="320" />
+    </g>
+    <polygon points="150,70 215,130 215,190 150,250" fill="rgba(138,180,248,0.22)" stroke="#e2e8f0" stroke-width="2" />
+    <polygon points="285,70 220,130 220,190 285,250" fill="rgba(138,180,248,0.22)" stroke="#e2e8f0" stroke-width="2" />
+    <rect x="90" y="150" width="230" height="20" fill="rgba(138,180,248,0.35)" stroke="#e2e8f0" stroke-width="2" />
+    <polygon points="490,45 565,120 565,200 490,275" fill="rgba(138,180,248,0.22)" stroke="#e2e8f0" stroke-width="2" />
+    <polygon points="645,45 570,120 570,200 645,275" fill="rgba(138,180,248,0.22)" stroke="#e2e8f0" stroke-width="2" />
+    <rect x="460" y="150" width="240" height="20" fill="rgba(138,180,248,0.35)" stroke="#e2e8f0" stroke-width="2" />
+    <line x1="218" y1="115" x2="568" y2="75" stroke="#ff9e66" stroke-width="6" stroke-dasharray="10,4" />
+    <line x1="218" y1="205" x2="568" y2="245" stroke="#ff9e66" stroke-width="6" stroke-dasharray="10,4" />
+    <g fill="#f8fafc" font-family="monospace" font-size="11">
+      <text x="45" y="140">WAŁEK WEJŚCIOWY (Z SILNIKA)</text>
+      <text x="145" y="52">KOŁO STOŻKOWE CZYNNE (WARIATOR 1)</text>
+      <text x="335" y="65" fill="#ff9e66">PAS STALOWY / ŁAŃCUCH</text>
+      <text x="465" y="34">KOŁO STOŻKOWE BIERNE (WARIATOR 2)</text>
+      <text x="580" y="140">WAŁEK WYJŚCIOWY (NA KOŁA)</text>
+      <text x="145" y="280">SIŁOWNIK HYDRAULICZNY PRZESUWU STOŻKA</text>
+    </g>
+    <rect x="555" y="248" width="225" height="52" fill="#0d2549" stroke="#8ab4f8" stroke-width="1.5" />
+    <text x="667" y="268" text-anchor="middle" fill="#ffffff" font-family="monospace" font-size="11" font-weight="bold">PRZEKŁADNIA BEZSTOPNIOWA CVT</text>
+    <text x="667" y="288" text-anchor="middle" fill="#8ab4f8" font-family="monospace" font-size="10">SCHEMAT BUDOWY WARIATORA</text>
+  </svg>
+  <figcaption>
+    <strong>Rys. 4. Skrzynia bezstopniowa z wariatorem (CVT) – Schemat budowy:</strong> płynna zmiana średnicy opasania poprzez hydrauliczne zsuwanie i rozsuwanie połówek kół stożkowych.
+  </figcaption>
+</figure>
+
+## 3. Zastosowanie rynkowe we współczesnej motoryzacji
+
+Współczesny rynek motoryzacyjny charakteryzuje się ogromnym uzależnieniem skrzyń biegów od oprogramowania sterującego (**TCU**) oraz integracją z systemami asystującymi (np. aktywny tempomat i asystent jazdy w korku, które bez automatu po prostu nie zadziałają):
+
+* **Klasyczne Automaty (AT):** Liderzy trwałości i aksamitnej kultury pracy. Skrzynie oparte na konstrukcji planetarnej i konwerterze momentu obrotowego firm takich jak **ZF** (m.in. powszechnie stosowany, niezawodny model **8HP** w BMW) czy **Aisin**, montuje się w niemal każdej limuzynie premium i cięższych SUV-ach.
+* **Dwusprzęgłowe (DCT / DSG):** Oferują najbardziej sportową charakterystykę z rynku aut seryjnych. Rozdzielając parzyste i nieparzyste biegi na dwa oddzielne wałki połączone dwoma sprzęgłami, komputer napędu potrafi niemal natychmiast zapiąć kolejny bieg, nie przerywając przyspieszenia. Standard w koncernie VW (**DSG, S tronic**), u inżynierów Porsche (**PDK**) oraz w spalinowej flocie marek Hyundai i Kia (modele **7DCT/8DCT**).
+* **Bezstopniowe CVT i hybrydowe e-CVT:** Opcje preferowane przez producentów japońskich – tradycyjne CVT stanowi trzon napędów w **Subaru (Lineartronic)** i **Nissanie**, natomiast słynny system **e-CVT** z hybryd **Toyoty** zasłynął jako jedno z najtrwalszych rozwiązań napędowych na świecie (choć mechanicznie bazuje on na przekładni planetarnej łączącej pracę dwóch silników elektrycznych z jednym spalinowym).
+* **Marginalizacja skrzyni manualnej (MT):** Niegdyś duma europejskiej motoryzacji, dziś znika z rynku w lawinowym tempie. Ze względu na rosnące wymogi emisji **Euro 6/7**, automatyczne sterowanie przełożeniami pozwala konstruktorom sprawniej optymalizować skład spalin i redukować spalanie. „Manuale” pozostawiono dziś głównie w bazowych modelach aut segmentu A i B (Dacia, Skoda) oraz czysto purystycznych zabawkach sportowych (np. Toyota GR Yaris, Ford Mustang).
+
+<WorkshopTip title="Wskazówka serwisowa z warsztatu: Wymiana oleju w skrzyni biegów" type="warsztat">
+  Nawet jeśli producent samochodu deklaruje olej typu <em>„Lifetime”</em> (na cały okres eksploatacji), w praktyce warsztatowej regularna wymiana oleju przekładniowego co <strong>60 000 km</strong> w skrzyniach dwusprzęgłowych (DSG/DCT) oraz co <strong>60 000 – 80 000 km</strong> w klasycznych automatach (np. ZF 8HP) drastycznie wydłuża życie mechatroniki, zaworów sterujących i tarczek ciernych!
+</WorkshopTip>
+
+## Podsumowanie
+
+W ciągu zaledwie stulecia skrzynia biegów z uciążliwego, całkowicie mechanicznego „zła koniecznego” przekształciła się w niesamowicie precyzyjne, niemalże inteligentne serce napędu, decydujące zarówno o komforcie podróżowania, dynamice auta, jak i finalnym poziomie emisji zanieczyszczeń do środowiska. Dzisiejsze zautomatyzowane układy przewyższają w sprawności zmiany biegów i optymalizacji spalania nawet najbardziej doświadczonych kierowców zawodowych.
+
+Paradoksalnie jednak mechaniczny szczyt doskonałości skrzyń biegów zbiega się w czasie z nadejściem rewolucji, która niemal całkowicie je uśmierci. Samochody w pełni elektryczne (**BEV**) posiadają silniki kręcące się z prędkościami rzędu **20 000 obr./min** oraz oferują maksymalny moment obrotowy już od pierwszej sekundy po naciśnięciu gazu. Z tego względu skomplikowane i ciężkie skrzynie zębate stają się zbędne, ustępując miejsca prostym **reduktorom jednobiegowym** (dominującym chociażby w autach marki Tesla). Tradycyjna sztuka doboru i synchronizacji trybów płynnie odchodzi w cień inżynierii falowników i oprogramowania zasilania w pakietach ogniw, redefiniując istotę napędu motoryzacyjnego z mechanicznej na cyfrową.
+
+<MechanicQuiz
+  title="Quiz podsumowujący wypracowanie o skrzyniach biegów"
+  questions={[
+    {
+      question: "Dlaczego w skrzyni dwusprzęgłowej (DCT / DSG) zmiana biegu następuje niemal bez przerwy w dostarczaniu mocy na koła?",
+      options: [
+        "Ponieważ posiada dwa współosiowe wałki wejściowe (dla biegów parzystych i nieparzystych) obsługiwane przez dwa osobne sprzęgła",
+        "Ponieważ nie posiada żadnych kół zębatych, tylko stalowy pas na stożkach",
+        "Ponieważ używa tylko jednego biegu jak samochód elektryczny"
+      ],
+      correctIndex: 0,
+      explanation: "Gdy jedziesz np. na 2. biegu, na drugim wałku mechatronika ma już wstępnie zazębiony 3. bieg – wystarczy przełączyć sprzęgła w ułamku sekundy!"
+    },
+    {
+      question: "Z jakich trzech głównych elementów składa się pojedynczy zestaw przekładni planetarnej w klasycznym automacie (AT)?",
+      options: [
+        "Koło zamachowe, pasek klinowy i alternator",
+        "Centralne koło słoneczne, koła satelitów na jarzmie oraz zewnętrzne koło koronowe",
+        "Dwa koła stożkowe i łańcuch wariatora"
+      ],
+      correctIndex: 1,
+      explanation: "Zestaw planetarny składa się z koła słonecznego w środku, obiegających je satelitów na jarzmie oraz zewnętrznego koła koronowego."
+    },
+    {
+      question: "Dlaczego samochody elektryczne (BEV) zazwyczaj nie potrzebują wielobiegowej skrzyni biegów?",
+      options: [
+        "Ponieważ silnik elektryczny generuje maksymalny moment obrotowy od 0 obr./min i osiąga bardzo wysokie obroty (nawet ~20 000 obr./min)",
+        "Ponieważ w autach elektrycznych nie ma dyferencjału",
+        "Ponieważ prawo zabrania stosowania skrzyń biegów w autach elektrycznych"
+      ],
+      correctIndex: 0,
+      explanation: "Szeroki zakres użytecznych obrotów silnika elektrycznego i pełny moment dostępny od startu sprawiają, że wystarcza prosty reduktor jednobiegowy."
+    }
+  ]}
+/>
+
+<QrCodeNotebookCard
+  defaultUrl="https://igorwielgus.pl/blog/skrzynie-biegow-wypracowanie"
+  essayTitle="Ewolucja, budowa i zasada działania samochodowych skrzyń biegów"
+  author="Igor Wielgus"
+  schoolInfo="Klasa 2 • Szkoła Branżowa w ZST w Lipnie (Mechanik Pojazdów Samochodowych)"
+/>
